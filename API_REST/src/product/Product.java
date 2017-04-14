@@ -17,14 +17,14 @@ public class Product extends DataBaseEntity{
 	private int id;
 	
 	@Column 
-	private int cost;
+	private int price;
 	
-	public int getCost() {
-		return cost;
+	public int getPrice() {
+		return price;
 	}
 
-	public void setCost(int cost) {
-		this.cost = cost;
+	public void setPrice(int price) {
+		this.price = price;
 	}
 
 	@OneToOne
