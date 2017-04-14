@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 import javax.annotation.security.*;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -24,6 +25,12 @@ import org.jboss.resteasy.util.Base64;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oracle.jrockit.jfr.RequestDelegate;
+
+import console.Console;
+import genre.Genre;
+import publisher.Publisher;
+import user.User;
+import user.UserDatabase;
 
 
 
@@ -77,11 +84,76 @@ public class ProductService
 	}
 
 
-	@RolesAllowed({"ADMIN", "USER"})
-	@PUT
-	@Path("/products")
-	public Response updateUserById()
+	@RolesAllowed({"ADMIN"})
+	@POST
+	@Path("/publishers/{name}")
+	public Response createPublisher(@PathParam("name") String name, @Context HttpRequest request)
 	{
-		return null;
+		System.err.println(" post publisher ");
+		
+		Publisher publisher = ProductDatabase.findPublisherByName(name);
+		if(publisher == null){
+			publisher = new Publisher();
+			publisher.setName(name);
+
+			ProductDatabase.insertPublisher(publisher);
+
+			publisher = ProductDatabase.findPublisherByName(name);
+			return Response.ok(publisher.getProperties())
+					.status(200)
+					.build();
+		}
+		else
+		{
+			System.err.println(" post publisher 500 ");
+			return Response.ok().status(500).build();
+		}
+	}
+	
+	@RolesAllowed({"ADMIN"})
+	@POST
+	@Path("/genres/{name}")
+	public Response createGenre(@PathParam("name") String name, @Context HttpRequest request)
+	{
+		Genre genre = ProductDatabase.findGenreByName(name);
+		if(genre == null){
+			genre = new Genre();
+			genre.setName(name);
+
+			ProductDatabase.insertGenre(genre);
+
+			genre = ProductDatabase.findGenreByName(name);
+			return Response.ok(genre.getProperties())
+					.status(200)
+					.build();
+		}
+		else
+		{
+			return Response.ok().status(500).build();
+		}
+	}
+	
+	
+	@RolesAllowed({"ADMIN"})
+	@POST
+	@Path("/consoles/{name}")
+	public Response createConsole(@PathParam("name") String name, @Context HttpRequest request)
+	{
+		Console console = ProductDatabase.findConsoleByName(name);
+		if(console == null){
+			console = new Console();
+			console.setName(name);
+
+			ProductDatabase.insertConsole(console);
+
+			console = ProductDatabase.findConsoleByName(name);
+			return Response.ok(console.getProperties())
+					.status(200)
+					.build();
+		}
+		else
+		{
+			return Response.ok().status(500).build();
+		}
 	}
 }

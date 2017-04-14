@@ -7,7 +7,10 @@ import org.hibernate.criterion.Example;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 
+import console.Console;
 import generic.Database;
+import genre.Genre;
+import publisher.Publisher;
 import user.User;
 
 public class ProductDatabase extends Database{
@@ -19,6 +22,16 @@ public class ProductDatabase extends Database{
 		Product product = (Product) session.get(Product.class,id);
 		session.getTransaction().commit();
 		return product;
+
+	}
+	
+	public static Publisher findPublisherByName(String name)
+	{
+		Session session = init(Publisher.class).openSession();
+		return (Publisher) session.createCriteria(Publisher.class)
+				.add(Restrictions.eq("name", name))
+				.uniqueResult();
+		
 
 	}
 	
@@ -36,5 +49,45 @@ public class ProductDatabase extends Database{
 		
 		session.save(product);
 		session.getTransaction().commit();
+	}
+
+	public static void insertPublisher(Publisher publisher) {
+		Session session = init(Publisher.class).openSession();
+		session.beginTransaction();
+		
+		session.save(publisher);
+		session.getTransaction().commit();
+	}
+
+	public static void insertGenre(Genre genre) {
+		Session session = init(Genre.class).openSession();
+		session.beginTransaction();
+		
+		session.save(genre);
+		session.getTransaction().commit();
+		
+	}
+
+	public static Genre findGenreByName(String name) {
+		Session session = init(Genre.class).openSession();
+		return (Genre) session.createCriteria(Genre.class)
+				.add(Restrictions.eq("name", name))
+				.uniqueResult();
+	}
+
+	public static void insertConsole(Console console) {
+		Session session = init(Console.class).openSession();
+		session.beginTransaction();
+		
+		session.save(console);
+		session.getTransaction().commit();
+		
+	}
+
+	public static Console findConsoleByName(String name) {
+		Session session = init(Console.class).openSession();
+		return (Console) session.createCriteria(Console.class)
+				.add(Restrictions.eq("name", name))
+				.uniqueResult();
 	}
 }

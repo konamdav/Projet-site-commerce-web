@@ -21,7 +21,12 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.jboss.resteasy.util.Base64;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oracle.jrockit.jfr.RequestDelegate;
+
+import command.Command;
+import product.ProductDatabase;
 
 
 
@@ -70,6 +75,114 @@ public class UserService
 		}		
 		return rb.build();
 	}
+
+	@RolesAllowed({"ADMIN", "USER"})
+	@GET
+	@Path("/commands/{id_user}/{id_command}")
+	public Response getCommandById(@PathParam("id_user") int id_user, @PathParam("id_command") int id_command, @Context HttpRequest request)
+	{
+		System.err.println("TEST");
+		final HttpHeaders headers = request.getHttpHeaders();
+		final String AUTHORIZATION_PROPERTY = "Authorization";
+		final String AUTHENTICATION_SCHEME = "Basic";
+		final List<String> authorization = headers.getRequestHeader(AUTHORIZATION_PROPERTY);
+		final String encodedUserPassword = authorization.get(0).replaceFirst(AUTHENTICATION_SCHEME + " ", "");
+
+		String usernameAndPassword="";
+		try {
+			usernameAndPassword = new String(Base64.decode(encodedUserPassword));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		final StringTokenizer tokenizer = new StringTokenizer(usernameAndPassword, ":");
+		final String username = tokenizer.nextToken();
+		final String password = tokenizer.nextToken();
+
+
+		User user = UserDatabase.findUserByID(id_user);
+
+
+		ResponseBuilder rb;
+		if(user == null)
+		{
+			rb = Response.serverError().status(404);
+		}
+		else 
+		{
+			if(!user.getUsername().equals(username)||!user.getPassword().equals(password))
+			{
+				rb = Response.serverError().status(403);
+			}
+			else
+			{
+				Command command = UserDatabase.findCommand(id_command);
+				if(command == null)
+				{
+					rb = Response.serverError().status(404);
+				}
+				else {
+					rb = Response.ok(command.getProperties());
+				}	
+			}
+		}
+		return rb.build();
+	}
+
+	@RolesAllowed({"ADMIN", "USER"})
+	@GET
+	@Path("/commands/{id_user}")
+	public Response getCommands(@PathParam("id_user") int id_user, @Context HttpRequest request)
+	{
+		final HttpHeaders headers = request.getHttpHeaders();
+		final String AUTHORIZATION_PROPERTY = "Authorization";
+		final String AUTHENTICATION_SCHEME = "Basic";
+		final List<String> authorization = headers.getRequestHeader(AUTHORIZATION_PROPERTY);
+		final String encodedUserPassword = authorization.get(0).replaceFirst(AUTHENTICATION_SCHEME + " ", "");
+
+		String usernameAndPassword="";
+		try {
+			usernameAndPassword = new String(Base64.decode(encodedUserPassword));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		final StringTokenizer tokenizer = new StringTokenizer(usernameAndPassword, ":");
+		final String username = tokenizer.nextToken();
+		final String password = tokenizer.nextToken();
+
+
+		User user = UserDatabase.findUserByID(id_user);
+
+
+		ResponseBuilder rb;
+		if(user == null)
+		{
+			rb = Response.serverError().status(404);
+		}
+		else 
+		{
+			if(!user.getUsername().equals(username)||!user.getPassword().equals(password))
+			{
+				rb = Response.serverError().status(403);
+			}
+			else
+			{
+				List list = UserDatabase.findCommands(user.getId());
+
+				ObjectMapper mapper = new ObjectMapper();
+				String json = "[]";
+				try {
+					json = mapper.writeValueAsString(list);
+				} catch (JsonProcessingException e) {
+					e.printStackTrace();
+				}
+				rb = Response.ok(json);
+			}	
+		}
+		return rb.build();
+	}
+
 
 	@PermitAll
 	@PUT

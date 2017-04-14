@@ -17,6 +17,10 @@ public class Command extends DataBaseEntity{
 	@Column
 	private int id_user;
 
+	public void setLinecommands(Set<LineCommand> linecommands) {
+		this.linecommands = linecommands;
+	}
+
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id_command")
 	private Set<LineCommand> linecommands;
 	
@@ -58,8 +62,14 @@ public class Command extends DataBaseEntity{
 		return id_user;
 	}
 
-	
-	
-	
+	public double getTotal()
+	{
+		double d = 0;
+		for(LineCommand lc : this.linecommands)
+		{
+			d+= lc.getQuantity()*lc.getProduct().getPrice();
+		}
+		return d;
+	}
 	
 }

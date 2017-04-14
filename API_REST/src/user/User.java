@@ -20,6 +20,7 @@ import user.role.UserRole;
 import javax.persistence.*;
 
 @Entity
+@Table(name="User")
 public class User extends DataBaseEntity implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -38,14 +39,13 @@ public class User extends DataBaseEntity implements Serializable {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id_user")
 	private Set<UserRole> userRoles;
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id_user")
+	/*@OneToMany(fetch = FetchType.LAZY, mappedBy = "id_user")
 	private Set<Command> commands;
-
 	
 	public Set<Command> getCommands() {
 		return commands;
 	}
-
+*/
 	public User() {
 		super();
 	}
