@@ -1,13 +1,20 @@
 package product;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 import console.Console;
 import generic.DataBaseEntity;
+import picture.Picture;
+import review.Review;
 import videogame.VideoGame;
 
 @Entity
@@ -18,19 +25,13 @@ public class Product extends DataBaseEntity{
 	
 	@Column 
 	private int price;
-	
-	public int getPrice() {
-		return price;
-	}
 
-	public void setPrice(int price) {
-		this.price = price;
-	}
 
 	@OneToOne
 	@JoinColumn(name="id_videogame",referencedColumnName="id")
 	private VideoGame videogame;
 	
+
 	@OneToOne
 	@JoinColumn(name="id_console",referencedColumnName="id")
 	private Console console;
@@ -38,11 +39,36 @@ public class Product extends DataBaseEntity{
 	@Column
 	private String date_release;
 	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id_product")
+	private List<Picture> pictures;
+	
+	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+	private List<Review> reviews;
+	
+	public List<Review> getReviews() {
+		return reviews;
+	}
+
+
+	public void setReviews(List<Review> reviews) {
+		this.reviews = reviews;
+	}
+
+
 	public Product() {
 		super();
 	
 	}
+	
 
+	public int getPrice() {
+		return price;
+	}
+
+	public void setPrice(int price) {
+		this.price = price;
+	}
+	
 	public int getId() {
 		return id;
 	}
@@ -76,7 +102,13 @@ public class Product extends DataBaseEntity{
 	}
 	
 	
+	public List<Picture> getPictures() {
+		return pictures;
+	}
 
+	public void setPictures(List<Picture> pictures) {
+		this.pictures = pictures;
+	}
 	
 	
 }

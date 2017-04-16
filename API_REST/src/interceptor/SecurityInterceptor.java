@@ -34,7 +34,7 @@ import org.jboss.resteasy.util.Base64;
 
 import user.User;
 import user.UserDatabase;
-import user.role.UserRole;
+
 
 
 
@@ -124,15 +124,9 @@ public class SecurityInterceptor implements PreProcessInterceptor
 		user.setPassword(password);
 		
 		user = UserDatabase.findByCriteria(username, password);
-		List<String> roles = new ArrayList<String>();
-		for(UserRole role : user.getUserRoles())
-		{
-			roles.add(role.getRole());
-		}
 		
-		List<String> APIRoles = new ArrayList<String>(rolesSet);
-		APIRoles.retainAll(roles);
-		if(!APIRoles.isEmpty())
+		
+		if(rolesSet.contains(user.getRole()))
 		{
 			isAllowed = true;
 			System.out.println("correct auth :/");

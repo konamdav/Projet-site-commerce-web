@@ -24,6 +24,7 @@ import org.jboss.resteasy.util.Base64;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.oracle.jrockit.jfr.RequestDelegate;
 
 import console.Console;
@@ -51,12 +52,69 @@ public class ProductService
 		}
 		else
 		{
-			System.out.println(product.getProperties());
 			rb = Response.ok(product.getProperties());
 		}		
 		return rb.build();
 	}
+	
+	@PermitAll
+	@GET
+	@Path("/products/{id}/sameProducts")
+	public Response getSameTagProducts(@PathParam("id") int id, @Context HttpRequest request)
+	{
+		Product product = ProductDatabase.findProductByID(id);
+		ResponseBuilder rb;
+		if(product == null)
+		{
+			rb = Response.serverError().status(404);
+		}
+		else
+		{
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.enable(SerializationFeature.INDENT_OUTPUT);
+			String json = "[]";
+			try {
+				json = mapper.writeValueAsString(ProductDatabase.findAllSameProducts(product));
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
 
+			rb = Response.ok(json);
+		}			
+		return rb.build();
+	}
+	
+
+	
+	
+	@PermitAll
+	@GET
+	@Path("/products/{id_product}/reviews")
+	public Response getReviews(@PathParam("id_product") int id_product, @Context HttpRequest request)
+	{
+		Product product = ProductDatabase.findProductByID(id_product);
+		ResponseBuilder rb;
+		if(product == null)
+		{
+			rb = Response.serverError().status(404);
+		}
+		else
+		{
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.enable(SerializationFeature.INDENT_OUTPUT);
+			String json = "[]";
+			try {
+				json = mapper.writeValueAsString(product.getReviews());
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
+
+			rb = Response.ok(json);
+		}		
+		return rb.build();
+		
+	}
+	
 	@PermitAll
 	@GET
 	@Path("/products")
@@ -64,7 +122,8 @@ public class ProductService
 	{
 		List list = ProductDatabase.findAll();
 		ObjectMapper mapper = new ObjectMapper();
-		String json = "{}";
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		String json = "[]";
 		try {
 			json = mapper.writeValueAsString(list);
 		} catch (JsonProcessingException e) {

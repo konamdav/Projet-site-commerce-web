@@ -22,9 +22,20 @@ public class LineCommand extends DataBaseEntity{
 	
 	@Column
 	private int quantity;
+	
+	@Column
+	private int price;
 
 	public LineCommand() {
 		super();
+	}
+
+	public int getPrice() {
+		return price;
+	}
+
+	public void setPrice(int price) {
+		this.price = price;
 	}
 
 	public int getId_command() {

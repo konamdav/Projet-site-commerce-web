@@ -20,9 +20,12 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.jboss.resteasy.spi.HttpRequest;
 import org.jboss.resteasy.util.Base64;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.oracle.jrockit.jfr.RequestDelegate;
 
 import command.Command;
@@ -30,7 +33,7 @@ import product.ProductDatabase;
 
 
 
-@Path("/user-service")
+@Path("/users-service")
 public class UserService
 {
 	@RolesAllowed({"ADMIN", "USER"})
@@ -38,7 +41,6 @@ public class UserService
 	@Path("/users/{id}")
 	public Response getUserById(@PathParam("id") int id, @Context HttpRequest request)
 	{
-		System.out.println("GET USER "+id);
 		final HttpHeaders headers = request.getHttpHeaders();
 		final String AUTHORIZATION_PROPERTY = "Authorization";
 		final String AUTHENTICATION_SCHEME = "Basic";
@@ -78,10 +80,9 @@ public class UserService
 
 	@RolesAllowed({"ADMIN", "USER"})
 	@GET
-	@Path("/commands/{id_user}/{id_command}")
+	@Path("/users/{id_user}/commands/{id_command}")
 	public Response getCommandById(@PathParam("id_user") int id_user, @PathParam("id_command") int id_command, @Context HttpRequest request)
 	{
-		System.err.println("TEST");
 		final HttpHeaders headers = request.getHttpHeaders();
 		final String AUTHORIZATION_PROPERTY = "Authorization";
 		final String AUTHENTICATION_SCHEME = "Basic";
@@ -99,9 +100,7 @@ public class UserService
 		final String username = tokenizer.nextToken();
 		final String password = tokenizer.nextToken();
 
-
 		User user = UserDatabase.findUserByID(id_user);
-
 
 		ResponseBuilder rb;
 		if(user == null)
@@ -131,8 +130,8 @@ public class UserService
 
 	@RolesAllowed({"ADMIN", "USER"})
 	@GET
-	@Path("/commands/{id_user}")
-	public Response getCommands(@PathParam("id_user") int id_user, @Context HttpRequest request)
+	@Path("users/{id_user}/commands")
+	public Response getCommands(@PathParam("id_user") int id_user, @Context HttpRequest request) throws JSONException
 	{
 		final HttpHeaders headers = request.getHttpHeaders();
 		final String AUTHORIZATION_PROPERTY = "Authorization";
@@ -151,9 +150,7 @@ public class UserService
 		final String username = tokenizer.nextToken();
 		final String password = tokenizer.nextToken();
 
-
 		User user = UserDatabase.findUserByID(id_user);
-
 
 		ResponseBuilder rb;
 		if(user == null)
@@ -168,15 +165,68 @@ public class UserService
 			}
 			else
 			{
-				List list = UserDatabase.findCommands(user.getId());
-
 				ObjectMapper mapper = new ObjectMapper();
+				mapper.enable(SerializationFeature.INDENT_OUTPUT);
 				String json = "[]";
 				try {
-					json = mapper.writeValueAsString(list);
+					json = mapper.writeValueAsString(user.getCommands());
 				} catch (JsonProcessingException e) {
 					e.printStackTrace();
 				}
+
+				rb = Response.ok(json);
+			}	
+		}
+		return rb.build();
+	}
+
+
+	@RolesAllowed({"ADMIN", "USER"})
+	@GET
+	@Path("/users/{id_user}/reviews")
+	public Response getReviews(@PathParam("id_user") int id_user, @Context HttpRequest request)
+	{
+		final HttpHeaders headers = request.getHttpHeaders();
+		final String AUTHORIZATION_PROPERTY = "Authorization";
+		final String AUTHENTICATION_SCHEME = "Basic";
+		final List<String> authorization = headers.getRequestHeader(AUTHORIZATION_PROPERTY);
+		final String encodedUserPassword = authorization.get(0).replaceFirst(AUTHENTICATION_SCHEME + " ", "");
+
+		String usernameAndPassword="";
+		try {
+			usernameAndPassword = new String(Base64.decode(encodedUserPassword));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		final StringTokenizer tokenizer = new StringTokenizer(usernameAndPassword, ":");
+		final String username = tokenizer.nextToken();
+		final String password = tokenizer.nextToken();
+
+		User user = UserDatabase.findUserByID(id_user);
+
+		ResponseBuilder rb;
+		if(user == null)
+		{
+			rb = Response.serverError().status(404);
+		}
+		else 
+		{
+			if(!user.getUsername().equals(username)||!user.getPassword().equals(password))
+			{
+				rb = Response.serverError().status(403);
+			}
+			else
+			{
+				ObjectMapper mapper = new ObjectMapper();
+				mapper.enable(SerializationFeature.INDENT_OUTPUT);
+				String json = "[]";
+				try {
+					json = mapper.writeValueAsString(user.getReviews());
+				} catch (JsonProcessingException e) {
+					e.printStackTrace();
+				}
+
 				rb = Response.ok(json);
 			}	
 		}
@@ -200,7 +250,6 @@ public class UserService
 			user.setSurname(surname);
 			user.setUsername(username);
 			user.setPassword(password);
-
 			UserDatabase.insertUser(user);
 
 			return Response.ok(user.getProperties())

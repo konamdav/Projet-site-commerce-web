@@ -2,6 +2,8 @@ package videogame;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
+
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -9,6 +11,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -22,7 +26,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import console.Console;
 import genre.Genre;
+import pegi_classification.PegiClassification;
 import publisher.Publisher;
+import tag.Tag;
 
 @Entity
 public class VideoGame {
@@ -34,9 +40,24 @@ public class VideoGame {
 	@JoinColumn(name="id_publisher",referencedColumnName="id")
 	private Publisher publisher;
 
-	@OneToOne
-	@JoinColumn(name="id_genre",referencedColumnName="id")
-	private Genre genre;
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinTable(name = "videogame_genre", joinColumns = {
+			@JoinColumn(name = "id_videogame") }
+			, inverseJoinColumns = { @JoinColumn(name = "id_genre")})
+	private List<Genre> genres;
+	
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinTable(name = "tag_videogame", joinColumns = {
+			@JoinColumn(name = "id_videogame") }
+			, inverseJoinColumns = { @JoinColumn(name = "id_tag")})
+	private List<Tag> tags;
+	
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinTable(name = "videogame_pegi_classification", joinColumns = {
+			@JoinColumn(name = "id_videogame") }
+			, inverseJoinColumns = { @JoinColumn(name = "id_pegi_classification")})
+	private List<PegiClassification> classifications;
+	
 	@Column
 	private String name;
 
@@ -51,6 +72,16 @@ public class VideoGame {
 	}
 
 
+	public List<Tag> getTags() {
+		return tags;
+	}
+
+
+	public void setTags(List<Tag> tags) {
+		this.tags = tags;
+	}
+
+
 	public Publisher getPublisher() {
 		return publisher;
 	}
@@ -60,16 +91,13 @@ public class VideoGame {
 		this.publisher = publisher;
 	}
 
-
-	
-
-	public Genre getGenre() {
-		return genre;
+	public List<Genre> getGenres() {
+		return genres;
 	}
 
 
-	public void setGenre(Genre genre) {
-		this.genre = genre;
+	public void setGenres(List<Genre> genres) {
+		this.genres = genres;
 	}
 
 
@@ -93,6 +121,16 @@ public class VideoGame {
 			return "";
 		}
 
+	}
+
+
+	public List<PegiClassification> getClassifications() {
+		return classifications;
+	}
+
+
+	public void setClassifications(List<PegiClassification> classifications) {
+		this.classifications = classifications;
 	}
 
 }

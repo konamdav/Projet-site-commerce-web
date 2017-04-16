@@ -3,6 +3,7 @@ package user;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Set;
 import java.util.Set;
 
@@ -15,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import command.Command;
 import generic.DataBaseEntity;
-import user.role.UserRole;
+import review.Review;
 
 import javax.persistence.*;
 
@@ -35,17 +36,33 @@ public class User extends DataBaseEntity implements Serializable {
 	private String mail;
 	@Column
 	private String password;
+	@Column
+	private String role;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private List<Review> reviews;
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id_user")
-	private Set<UserRole> userRoles;
+	@OneToMany(mappedBy = "id_user", cascade = CascadeType.ALL)
+	private List<Command> commands;
 	
-	/*@OneToMany(fetch = FetchType.LAZY, mappedBy = "id_user")
-	private Set<Command> commands;
-	
-	public Set<Command> getCommands() {
+	@JsonIgnore
+	public List<Command> getCommands() {
 		return commands;
 	}
-*/
+
+	public void setCommands(List<Command> commands) {
+		this.commands = commands;
+	}
+
+	@JsonIgnore
+	public List<Review> getReviews() {
+		return reviews;
+	}
+
+	public void setReviews(List<Review> reviews) {
+		this.reviews = reviews;
+	}
+
 	public User() {
 		super();
 	}
@@ -58,14 +75,15 @@ public class User extends DataBaseEntity implements Serializable {
 		this.username = username;
 	}
 
-	public Set<UserRole> getUserRoles() {
-		return userRoles;
+	
+	public String getRole() {
+		return role;
 	}
 
-	public void setUserRole(Set<UserRole> userRoles) {
-		this.userRoles = userRoles;
+	public void setRole(String role) {
+		this.role = role;
 	}
-	
+
 	public int getId() {
 		return id;
 	}
@@ -98,6 +116,7 @@ public class User extends DataBaseEntity implements Serializable {
 		this.mail = mail;
 	}
 
+	@JsonIgnore
 	public String getPassword() {
 		return password;
 	}

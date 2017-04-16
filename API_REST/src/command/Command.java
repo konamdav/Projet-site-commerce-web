@@ -67,7 +67,7 @@ public class Command extends DataBaseEntity{
 		double d = 0;
 		for(LineCommand lc : this.linecommands)
 		{
-			d+= lc.getQuantity()*lc.getProduct().getPrice();
+			d+= lc.getQuantity()*lc.getPrice();
 		}
 		return d;
 	}

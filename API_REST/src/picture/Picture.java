@@ -8,14 +8,26 @@ import generic.DataBaseEntity;
 
 @Entity
 public class Picture extends DataBaseEntity{
-
+	
 	@Id
 	private int id;
 	@Column
 	private String  img;
 	@Column
 	private String  name;
+	@Column
+	private int  id_product;
 	
+	public int getId_product() {
+		return id_product;
+	}
+
+
+	public void setId_product(int id_product) {
+		this.id_product = id_product;
+	}
+
+
 	public String getName() {
 		return name;
 	}

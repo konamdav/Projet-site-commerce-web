@@ -90,4 +90,15 @@ public class ProductDatabase extends Database{
 				.add(Restrictions.eq("name", name))
 				.uniqueResult();
 	}
+
+	public static List findAllSameProducts(Product product) {
+
+		Session session = init(Product.class).openSession();
+		return session.createCriteria(Product.class)
+				.add(Restrictions.ne("id", product.getId()))
+				.createAlias("videogame", "vg")
+				//.add(Restrictions.eq("vg.id_publisher", product.getVideogame().getPublisher().getId()))
+				.list();
+		
+	}
 }
