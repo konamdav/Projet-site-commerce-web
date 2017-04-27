@@ -3,6 +3,7 @@ package generic;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
@@ -13,11 +14,11 @@ import com.mysql.jdbc.Driver;
 import user.User;
 
 public abstract class Database {
-
+	public static Session session  = init().openSession();
 	
-	protected static SessionFactory init(Class c) {
+	protected static SessionFactory init() {
 		Configuration configuration = new Configuration().configure();
-		configuration.addAnnotatedClass(c);
+		//configuration.addAnnotatedClass(c);
 		
 		ServiceRegistry serviceRegistry = new ServiceRegistryBuilder()
 				.applySettings(configuration.getProperties()).buildServiceRegistry();

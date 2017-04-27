@@ -14,9 +14,10 @@ import publisher.Publisher;
 import user.User;
 
 public class ProductDatabase extends Database{
+	private static Session session  = Database.session;
+	
 	public static Product findProductByID(int id)
 	{
-		Session session = init(Product.class).openSession();
 		session.beginTransaction();
 
 		Product product = (Product) session.get(Product.class,id);
@@ -27,7 +28,7 @@ public class ProductDatabase extends Database{
 	
 	public static Publisher findPublisherByName(String name)
 	{
-		Session session = init(Publisher.class).openSession();
+		
 		return (Publisher) session.createCriteria(Publisher.class)
 				.add(Restrictions.eq("name", name))
 				.uniqueResult();
@@ -37,14 +38,12 @@ public class ProductDatabase extends Database{
 	
 	public static List findAll()
 	{
-		Session session = init(Product.class).openSession();
 		return session.createCriteria(Product.class).list();
 		
 	}
 	
 	public static void insertProduct(Product product)
 	{
-		Session session = init(Product.class).openSession();
 		session.beginTransaction();
 		
 		session.save(product);
@@ -52,7 +51,7 @@ public class ProductDatabase extends Database{
 	}
 
 	public static void insertPublisher(Publisher publisher) {
-		Session session = init(Publisher.class).openSession();
+		
 		session.beginTransaction();
 		
 		session.save(publisher);
@@ -60,7 +59,6 @@ public class ProductDatabase extends Database{
 	}
 
 	public static void insertGenre(Genre genre) {
-		Session session = init(Genre.class).openSession();
 		session.beginTransaction();
 		
 		session.save(genre);
@@ -69,14 +67,13 @@ public class ProductDatabase extends Database{
 	}
 
 	public static Genre findGenreByName(String name) {
-		Session session = init(Genre.class).openSession();
+		
 		return (Genre) session.createCriteria(Genre.class)
 				.add(Restrictions.eq("name", name))
 				.uniqueResult();
 	}
 
 	public static void insertConsole(Console console) {
-		Session session = init(Console.class).openSession();
 		session.beginTransaction();
 		
 		session.save(console);
@@ -85,15 +82,12 @@ public class ProductDatabase extends Database{
 	}
 
 	public static Console findConsoleByName(String name) {
-		Session session = init(Console.class).openSession();
 		return (Console) session.createCriteria(Console.class)
 				.add(Restrictions.eq("name", name))
 				.uniqueResult();
 	}
 
 	public static List findAllSameProducts(Product product) {
-
-		Session session = init(Product.class).openSession();
 		return session.createCriteria(Product.class)
 				.add(Restrictions.ne("id", product.getId()))
 				.createAlias("videogame", "vg")

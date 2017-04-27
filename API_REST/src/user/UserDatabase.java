@@ -9,15 +9,16 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 
 import command.Command;
+import command.LineCommand;
 import generic.Database;
 import product.Product;
 
 public class UserDatabase extends Database{
+	private static Session session  = Database.session;
+	
 	public static User findUserByID(int id)
 	{
-		Session session = init(User.class).openSession();
 		session.beginTransaction();
-
 		User usr = (User) session.get(User.class,id);
 		session.getTransaction().commit();
 		return usr;
@@ -26,8 +27,7 @@ public class UserDatabase extends Database{
 
 	public static User findByCriteria(String username, String password)
 	{
-		Session session = init(User.class).openSession();
-
+		
 		User resUser = (User) session.createCriteria(User.class)
 				.add(Restrictions.and(
 						Restrictions.eq("username", username),
@@ -38,8 +38,7 @@ public class UserDatabase extends Database{
 	
 	public static User findByCriteria(String username)
 	{
-		Session session = init(User.class).openSession();
-
+		
 		User resUser = (User) session.createCriteria(User.class)
 				.add(Restrictions.eq("username", username))
 				.uniqueResult();
@@ -48,28 +47,56 @@ public class UserDatabase extends Database{
 	
 	public static List findCommands(int id_user)
 	{
-		Session session = init(Command.class).openSession();
+		
 		return session.createCriteria(Command.class)
 				.add(Restrictions.eq("id_user", id_user))
+				.add(Restrictions.eq("status", "PAYE"))
 				.list();		
 	}
 
-	public static void insertUser(User user)
+	public static void saveUser(User user)
 	{
-		Session session = init(User.class).openSession();
 		session.beginTransaction();
 		
 		session.save(user);
 		session.getTransaction().commit();
 	}
+	
+	public static void saveCommand(Command command)
+	{
+		session.beginTransaction();
+		session.save(command);
+		session.getTransaction().commit();
+	}
+	
+	public static void saveLineCommand(LineCommand lineCommand)
+	{
+		session.beginTransaction();
+		session.save(lineCommand);
+		session.getTransaction().commit();
+	}
 
 	public static Command findCommand(int id_command) {
 		
-		Session session = init(Command.class).openSession();
 		session.beginTransaction();
-
 		Command cmd = (Command) session.get(Command.class,id_command);
 		session.getTransaction().commit();
 		return cmd;
+	}
+	
+public static LineCommand findLineCommand(int id_linecommand) {
+		
+		session.beginTransaction();
+		LineCommand linecmd = (LineCommand) session.get(LineCommand.class,id_linecommand);
+		session.getTransaction().commit();
+		return linecmd;
+	}
+	
+	public static Command findPanier(int id_user) {
+		
+		return (Command) session.createCriteria(Command.class)
+				.add(Restrictions.eq("id_user", id_user))
+				.add(Restrictions.eq("status", "NON_PAYE"))
+				.uniqueResult();		
 	}
 }
