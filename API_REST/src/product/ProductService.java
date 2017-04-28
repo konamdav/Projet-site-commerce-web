@@ -8,6 +8,7 @@ import java.util.StringTokenizer;
 
 import javax.annotation.security.*;
 import javax.interceptor.Interceptors;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -32,8 +33,7 @@ import genre.Genre;
 import publisher.Publisher;
 import user.User;
 import user.UserDatabase;
-
-
+import videogame.VideoGame;
 
 @Path("/products-service")
 public class ProductService
@@ -56,7 +56,88 @@ public class ProductService
 		}		
 		return rb.build();
 	}
-	
+
+	@RolesAllowed({"ADMIN"})
+	@POST
+	@Path("/products/{id_videogame}/{id_console}/{price}/{date}")
+	public Response newProduct(@PathParam("id_videogame") int id_videogame,
+			@PathParam("id_console") int id_console,
+			@PathParam("price") int price,
+			@PathParam("date") String date,
+			@Context HttpRequest request)
+	{
+		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame);
+		Console console = ProductDatabase.findConsoleByID(id_console);
+		
+		ResponseBuilder rb = null;
+		
+		if(videogame!= null && console!=null)
+		{
+			Product product = ProductDatabase.findProductByKey(videogame, console);			
+			if(product != null)
+			{
+				rb = Response.serverError().status(403);
+			}
+			else
+			{
+				product = new Product();
+				product.setConsole(console);
+				product.setDate_release(date);
+				product.setPrice(price);
+				product.setVideogame(videogame);
+
+				ProductDatabase.insertProduct(product);
+				rb = Response.ok(product.getProperties());
+			}		
+		}
+		else
+		{
+			rb = Response.serverError().status(403);
+		}
+		
+		return rb.build();
+	}
+
+	@RolesAllowed({"ADMIN"})
+	@PUT
+	@Path("/products/{id_product}/{id_videogame}/{id_console}/{price}/{date}")
+	public Response updateProduct(@PathParam("id_product") int id_product, 
+			@PathParam("id_videogame") int id_videogame,
+			@PathParam("id_console") int id_console,
+			@PathParam("price") int price,
+			@PathParam("date") String date,
+			@Context HttpRequest request)
+	{
+		Product product = ProductDatabase.findProductByID(id_product);
+
+		ResponseBuilder rb;
+		if(product == null)
+		{
+			rb = Response.serverError().status(404);
+		}
+		else
+		{
+			Console console = ProductDatabase.findConsoleByID(id_console);
+			VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame);
+			if(console != null && videogame != null)
+			{
+				product.setConsole(console);
+				product.setDate_release(date);
+				product.setPrice(price);
+				product.setVideogame(videogame);
+
+				ProductDatabase.insertProduct(product);				
+				rb = Response.ok(product.getProperties());
+			}
+			else
+			{
+				rb = Response.serverError().status(404);
+			}
+
+		}		
+		return rb.build();
+	}
+
 	@PermitAll
 	@GET
 	@Path("/products/{id}/sameProducts")
@@ -83,10 +164,10 @@ public class ProductService
 		}			
 		return rb.build();
 	}
-	
 
-	
-	
+
+
+
 	@PermitAll
 	@GET
 	@Path("/products/{id_product}/reviews")
@@ -112,9 +193,9 @@ public class ProductService
 			rb = Response.ok(json);
 		}		
 		return rb.build();
-		
+
 	}
-	
+
 	@PermitAll
 	@GET
 	@Path("/products")
@@ -129,7 +210,7 @@ public class ProductService
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
-		
+
 		ResponseBuilder rb;
 		if(json.isEmpty())
 		{
@@ -149,7 +230,7 @@ public class ProductService
 	public Response createPublisher(@PathParam("name") String name, @Context HttpRequest request)
 	{
 		System.err.println(" post publisher ");
-		
+
 		Publisher publisher = ProductDatabase.findPublisherByName(name);
 		if(publisher == null){
 			publisher = new Publisher();
@@ -168,7 +249,32 @@ public class ProductService
 			return Response.ok().status(500).build();
 		}
 	}
-	
+
+
+	@RolesAllowed({"ADMIN"})
+	@POST
+	@Path("/publishers/{name}")
+	public Response updatePublisher(@PathParam("id_publisher") int id_publisher, @PathParam("name") String name, @Context HttpRequest request)
+	{
+		System.err.println(" post publisher ");
+
+		Publisher publisher = ProductDatabase.findPublisherByID(id_publisher);
+
+		if(publisher != null){
+
+			publisher.setName(name);
+			ProductDatabase.insertPublisher(publisher);
+
+			return Response.ok(publisher.getProperties())
+					.status(200)
+					.build();
+		}
+		else
+		{
+			return Response.ok().status(404).build();
+		}
+	}
+
 	@RolesAllowed({"ADMIN"})
 	@POST
 	@Path("/genres/{name}")
@@ -191,8 +297,30 @@ public class ProductService
 			return Response.ok().status(500).build();
 		}
 	}
-	
-	
+
+
+	@RolesAllowed({"ADMIN"})
+	@PUT
+	@Path("/genres/{id_genre}/{name}")
+	public Response updateGenre(@PathParam("id_genre") int id_genre, @PathParam("name") String name, @Context HttpRequest request)
+	{
+		Genre genre = ProductDatabase.findGenreByID(id_genre);
+		if(genre != null){
+
+			genre.setName(name);
+			ProductDatabase.insertGenre(genre);
+
+			return Response.ok(genre.getProperties())
+					.status(200)
+					.build();
+		}
+		else
+		{
+			return Response.ok().status(404).build();
+		}
+	}
+
+
 	@RolesAllowed({"ADMIN"})
 	@POST
 	@Path("/consoles/{name}")
@@ -213,6 +341,30 @@ public class ProductService
 		else
 		{
 			return Response.ok().status(500).build();
+		}
+	}
+
+
+	@RolesAllowed({"ADMIN"})
+	@PUT
+	@Path("/consoles/{id_console}/{name}")
+	public Response updateConsole(@PathParam("id_console") int id_console, 
+			@PathParam("name") String name,
+			@Context HttpRequest request)
+	{
+		Console console = 	ProductDatabase.findConsoleByID(id_console);
+		if(console != null){
+
+			console.setName(name);
+			ProductDatabase.insertConsole(console);
+
+			return Response.ok(console.getProperties())
+					.status(200)
+					.build();
+		}
+		else
+		{
+			return Response.ok().status(404).build();
 		}
 	}
 }

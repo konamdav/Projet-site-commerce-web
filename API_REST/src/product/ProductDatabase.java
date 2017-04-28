@@ -12,6 +12,7 @@ import generic.Database;
 import genre.Genre;
 import publisher.Publisher;
 import user.User;
+import videogame.VideoGame;
 
 public class ProductDatabase extends Database{
 	private static Session session  = Database.session;
@@ -19,10 +20,102 @@ public class ProductDatabase extends Database{
 	public static Product findProductByID(int id)
 	{
 		session.beginTransaction();
-
 		Product product = (Product) session.get(Product.class,id);
 		session.getTransaction().commit();
 		return product;
+
+	}
+	
+	
+	public static VideoGame findVideoGameByID(int id)
+	{
+		session.beginTransaction();
+		VideoGame videogame = (VideoGame) session.get(VideoGame.class,id);
+		session.getTransaction().commit();
+		return videogame;
+
+	}
+	
+
+	
+	public static void deleteConsole(Console c)
+	{
+		session.beginTransaction();
+		session.delete(c);
+		session.getTransaction().commit();
+
+	}
+	
+	public static void deleteGenre(Genre c)
+	{
+		session.beginTransaction();
+		session.delete(c);
+		session.getTransaction().commit();
+
+	}
+	
+	public static void deletePublisher(Publisher c)
+	{
+		session.beginTransaction();
+		session.delete(c);
+		session.getTransaction().commit();
+
+	}
+	
+	public static void deleteProduct(Product c)
+	{
+		session.beginTransaction();
+		session.delete(c);
+		session.getTransaction().commit();
+
+	}
+	
+	public static void deleteVideoGame(VideoGame c)
+	{
+		session.beginTransaction();
+		session.delete(c);
+		session.getTransaction().commit();
+
+	}
+	
+
+	public static Console findConsoleByID(int id)
+	{
+		session.beginTransaction();
+		Console console = (Console) session.get(Console.class,id);
+		session.getTransaction().commit();
+		return console;
+
+	}
+	
+
+	public static Publisher findPublisherByID(int id)
+	{
+		session.beginTransaction();
+		Publisher publisher = (Publisher) session.get(Publisher.class,id);
+		session.getTransaction().commit();
+		return publisher;
+
+	}
+	
+
+	public static Genre findGenreByID(int id)
+	{
+		session.beginTransaction();
+		Genre genre = (Genre) session.get(Product.class,id);
+		session.getTransaction().commit();
+		return genre;
+
+	}
+	
+	public static Product findProductByKey(VideoGame videogame, Console console)
+	{
+		
+		return (Product) session.createCriteria(Product.class)
+				.add(Restrictions.eq("videogame", videogame))
+				.add(Restrictions.eq("console", console))
+				.uniqueResult();
+		
 
 	}
 	
