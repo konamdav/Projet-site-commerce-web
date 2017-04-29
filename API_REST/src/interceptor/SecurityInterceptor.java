@@ -68,7 +68,9 @@ public class SecurityInterceptor implements PreProcessInterceptor
 
 		//Get request headers
 		final HttpHeaders headers = request.getHttpHeaders();
-
+		
+		
+		
 		//Fetch authorization header
 		final List<String> authorization = headers.getRequestHeader(AUTHORIZATION_PROPERTY);
 
@@ -106,15 +108,15 @@ public class SecurityInterceptor implements PreProcessInterceptor
 			Set<String> rolesSet = new HashSet<String>(Arrays.asList(rolesAnnotation.value()));
 
 			//Is user valid?
-					if( ! isUserAllowed(username, password, rolesSet))
-					{
-						return ACCESS_DENIED;
-					}
+			if( ! isUserAllowed(username, password, rolesSet, request))
+			{
+				return ACCESS_DENIED;
+			}
 		}
 		return null;
 	}
 
-	private boolean isUserAllowed(final String username, final String password, final Set<String> rolesSet) 
+	private boolean isUserAllowed(final String username, final String password, final Set<String> rolesSet, HttpRequest request) 
 	{
 		System.out.println("check auth ...");
 		boolean isAllowed = false;
@@ -122,12 +124,15 @@ public class SecurityInterceptor implements PreProcessInterceptor
 		User user = new User();
 		user.setUsername(username);
 		user.setPassword(password);
-		
+
 		user = UserDatabase.findByCriteria(username, password);
+
 		
-		
-		if(rolesSet.contains(user.getRole()))
+
+		if(user!= null && rolesSet.contains(user.getRole()))
 		{
+			System.out.println("INTERCEPT ID "+user.getId());
+			request.setAttribute("INTERCEPTOR-ID-USER", user.getId());
 			isAllowed = true;
 			System.out.println("correct auth :/");
 		}

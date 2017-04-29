@@ -6,6 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import generic.DataBaseEntity;
+import generic.Functions;
 
 @Table(name="pegi_classification")
 @Entity
@@ -32,7 +33,7 @@ public class PegiClassification extends DataBaseEntity{
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		this.name = Functions.stringToHtmlString(name);
 	}
 
 	public String getImg() {
@@ -40,6 +41,6 @@ public class PegiClassification extends DataBaseEntity{
 	}
 
 	public void setImg(String img) {
-		this.img = img;
+		this.img = Functions.stringToHtmlString(img);
 	}
 }

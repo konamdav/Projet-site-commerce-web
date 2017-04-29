@@ -13,6 +13,7 @@ import javax.persistence.OneToOne;
 
 import console.Console;
 import generic.DataBaseEntity;
+import generic.Functions;
 import picture.Picture;
 import review.Review;
 import videogame.VideoGame;
@@ -98,7 +99,7 @@ public class Product extends DataBaseEntity{
 	}
 
 	public void setDate_release(String date_release) {
-		this.date_release = date_release;
+		this.date_release = Functions.stringToHtmlString(date_release);
 	}
 	
 	

@@ -21,7 +21,7 @@ public class LineCommand extends DataBaseEntity{
 	private Product product;
 	
 	@Column
-	private int quantity;
+	private int quantity = 0;
 	
 	@Column
 	private int price;

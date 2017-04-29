@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import command.Command;
 import generic.DataBaseEntity;
+import generic.Functions;
 import review.Review;
 
 import javax.persistence.*;
@@ -72,16 +73,15 @@ public class User extends DataBaseEntity implements Serializable {
 	}
 
 	public void setUsername(String username) {
-		this.username = username;
+		this.username = Functions.stringToHtmlString(username);
 	}
-
 	
 	public String getRole() {
 		return role;
 	}
 
 	public void setRole(String role) {
-		this.role = role;
+		this.role = Functions.stringToHtmlString(role);
 	}
 
 	public int getId() {
@@ -97,7 +97,7 @@ public class User extends DataBaseEntity implements Serializable {
 	}
 
 	public void setSurname(String surname) {
-		this.surname = surname;
+		this.surname = Functions.stringToHtmlString(surname);
 	}
 
 	public String getFirstname() {
@@ -105,7 +105,7 @@ public class User extends DataBaseEntity implements Serializable {
 	}
 
 	public void setFirstname(String firstname) {
-		this.firstname = firstname;
+		this.firstname = Functions.stringToHtmlString(firstname);
 	}
 
 	public String getMail() {
@@ -113,7 +113,7 @@ public class User extends DataBaseEntity implements Serializable {
 	}
 
 	public void setMail(String mail) {
-		this.mail = mail;
+		this.mail = Functions.stringToHtmlString(mail);
 	}
 
 	@JsonIgnore
@@ -122,6 +122,6 @@ public class User extends DataBaseEntity implements Serializable {
 	}
 
 	public void setPassword(String password) {
-		this.password = password;
+		this.password = Functions.stringToHtmlString(password);
 	}	
 }

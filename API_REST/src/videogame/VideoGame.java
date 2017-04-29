@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import console.Console;
+import generic.Functions;
 import genre.Genre;
 import pegi_classification.PegiClassification;
 import publisher.Publisher;
@@ -107,7 +108,7 @@ public class VideoGame {
 
 
 	public void setName(String name) {
-		this.name = name;
+		this.name = Functions.stringToHtmlString(name);
 	}
 
 

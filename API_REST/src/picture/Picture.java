@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 import generic.DataBaseEntity;
+import generic.Functions;
 
 @Entity
 public class Picture extends DataBaseEntity{
@@ -34,7 +35,7 @@ public class Picture extends DataBaseEntity{
 
 
 	public void setName(String name) {
-		this.name = name;
+		this.name = Functions.stringToHtmlString(name);;
 	}
 
 
@@ -59,7 +60,7 @@ public class Picture extends DataBaseEntity{
 
 
 	public void setImg(String img) {
-		this.img = img;
+		this.img = Functions.stringToHtmlString(img);
 	}
 	
 	

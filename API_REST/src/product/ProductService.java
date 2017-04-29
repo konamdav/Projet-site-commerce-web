@@ -117,6 +117,7 @@ public class ProductService
 		}
 		else
 		{
+			
 			Console console = ProductDatabase.findConsoleByID(id_console);
 			VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame);
 			if(console != null && videogame != null)
@@ -229,7 +230,7 @@ public class ProductService
 	@Path("/publishers/{name}")
 	public Response createPublisher(@PathParam("name") String name, @Context HttpRequest request)
 	{
-		System.err.println(" post publisher ");
+		/** Prevent XSS **/
 
 		Publisher publisher = ProductDatabase.findPublisherByName(name);
 		if(publisher == null){

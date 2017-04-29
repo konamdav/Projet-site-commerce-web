@@ -8,6 +8,7 @@ import javax.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import generic.DataBaseEntity;
+import generic.Functions;
 import product.Product;
 
 @Entity
@@ -20,9 +21,6 @@ public class Command extends DataBaseEntity{
 
 	@Column
 	private int id_user;
-
-	@Column
-	private String status;
 
 	public void setLinecommands(Set<LineCommand> linecommands) {
 		this.linecommands = linecommands;
@@ -48,10 +46,6 @@ public class Command extends DataBaseEntity{
 		this.date_command = date_command;
 	}
 
-	/*public void setLinecommands(Set<LineCommand> linecommands) {
-		this.linecommands = linecommands;
-	}*/
-
 	public void setId_user(int id_user) {
 		this.id_user = id_user;
 	}
@@ -70,14 +64,6 @@ public class Command extends DataBaseEntity{
 		return id_user;
 	}
 
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
 	public double getTotal()
 	{
 		double d = 0;
@@ -92,14 +78,35 @@ public class Command extends DataBaseEntity{
 
 	public LineCommand addLineCommand(Product product, int quantity)
 	{
-		LineCommand line = new LineCommand();
+		LineCommand line = this.findLineCommand(product);
+		if(line == null)
+		{
+			line = new LineCommand();
+			this.linecommands.add(line);	
+		}
+		
 		line.setProduct(product);
 		line.setPrice(product.getPrice());
-		line.setQuantity(quantity);
+		line.setQuantity(line.getQuantity() + quantity);
 		line.setId_command(this.id);
-		this.linecommands.add(line);
 		
 		return line;
+	}
+	
+	
+	public LineCommand findLineCommand(Product product)
+	{
+		LineCommand lineCommand = null;
+		
+		for(LineCommand lc : this.linecommands)
+		{
+			if(lc.getProduct().getId()== product.getId())
+			{
+				lineCommand = lc;
+			}
+		}
+		
+		return lineCommand;
 	}
 	
 	public LineCommand removeLineCommand(LineCommand linecommand)

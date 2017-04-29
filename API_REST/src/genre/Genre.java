@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 import generic.DataBaseEntity;
+import generic.Functions;
 
 @Entity
 public class Genre extends DataBaseEntity {
@@ -33,8 +34,9 @@ public class Genre extends DataBaseEntity {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setName(String name) 
+	{	
+		this.name = Functions.stringToHtmlString(name);
 	}
 	
 	

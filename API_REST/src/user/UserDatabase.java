@@ -50,7 +50,6 @@ public class UserDatabase extends Database{
 		
 		return session.createCriteria(Command.class)
 				.add(Restrictions.eq("id_user", id_user))
-				.add(Restrictions.eq("status", "PAYE"))
 				.list();		
 	}
 
@@ -92,11 +91,5 @@ public static LineCommand findLineCommand(int id_linecommand) {
 		return linecmd;
 	}
 	
-	public static Command findPanier(int id_user) {
-		
-		return (Command) session.createCriteria(Command.class)
-				.add(Restrictions.eq("id_user", id_user))
-				.add(Restrictions.eq("status", "NON_PAYE"))
-				.uniqueResult();		
-	}
+	
 }

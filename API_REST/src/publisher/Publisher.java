@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 import generic.DataBaseEntity;
+import generic.Functions;
 
 @Entity
 public class Publisher extends DataBaseEntity{
@@ -33,7 +34,7 @@ public class Publisher extends DataBaseEntity{
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		this.name = Functions.stringToHtmlString(name);
 	}
 
 }
