@@ -43,6 +43,41 @@ public class ProductDatabase extends Database{
 
 	}
 	
+	
+	
+	
+	public static List researchProduct(ResearchedProduct rp)
+	{
+		SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+		Session session  = sessionFactory.openSession();
+		String request = "select p.videogame from product.Product as p "; //join genre.Genre as g join videogame.VideoGame as v join publisher.Publisher as pub";//, pegi_classification.PegiClassification as peg ";
+		if(!rp.videogame.equals("null") || !rp.publisher.equals("null") ||!rp.console.equals("null") || rp.tags.size() >0 || rp.genres.size() >0 || rp.pegis.size() >0) 
+		{
+			request += " where ";
+			if(!rp.videogame.equals("null")) request += "p.videogame.name = '" + rp.videogame + "' AND ";
+			if(!rp.console.equals("null")) request += "p.videogame.console.name = '" + rp.console + "' AND ";
+			if(!rp.publisher.equals("null")) request +="p.videogame.publisher.name = '" + rp.publisher + "' AND ";
+			for(int i = 0; i<rp.tags.size() ; i++){
+				if(!rp.tags.get(i).equals("null")) request += "(select g from tag.Genre as g where g.name = '" + rp.tags.get(i) + "') in elements(p.videogame.genres) AND ";
+			}
+			for(int i = 0; i<rp.pegis.size() ; i++){
+				if(!rp.pegis.get(i).equals("null")) request += "(select g from pegi_classification.PegiClassification as g where g.name = '" + rp.pegis.get(i) + "') in elements(p.videogame.PegiClassification) AND ";
+			}
+			for(int i = 0; i<rp.genres.size() ; i++){
+				if(!rp.genres.get(i).equals("null")) request += "(select g from genre.Genre as g where g.name = '" + rp.genres.get(i) + "') in elements(p.videogame.genres) AND ";
+			}
+			request = request.substring(0, request.length()-5);
+		}
+		Query query = session.createQuery(request);
+		List result = query.list();
+		
+		return result;
+		
+	}
+	
+	
+	
+	
 	public static List researchProduct(String name, String genre, String publisher, String tag, String pegi, String console)
 	{
 		SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();

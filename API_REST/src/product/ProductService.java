@@ -1,6 +1,7 @@
 package product;
 
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.StringTokenizer;
 
 import javax.annotation.security.*;
 import javax.interceptor.Interceptors;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -195,6 +197,78 @@ public class ProductService
 		return rb.build();
 	}
 
+	
+	@PermitAll
+	@POST
+	@Path("/products/research/")
+	public Response research(@Context HttpServletRequest request) throws IOException
+	{
+		System.out.println("coucou");
+		BufferedReader reader = request.getReader();
+		String response = new String();
+		for (String line; (line = reader.readLine()) != null; response += line);
+		ObjectMapper map = new ObjectMapper();
+		ResearchedProduct researchedProduct = map.readValue(response, ResearchedProduct.class);
+		
+		
+		List list =	ProductDatabase.researchProduct(researchedProduct);
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		String json = "[]";
+		try {
+			json = mapper.writeValueAsString(list);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+
+		ResponseBuilder rb;
+		if(json.isEmpty())
+		{
+			rb = Response.serverError().status(404);
+		}
+		else
+		{
+			rb = Response.ok(json).status(200);
+		}		
+		return rb.build();
+	}
+	
+	
+
+	@PermitAll
+	@POST
+	@Path("/products/name={name}-genre={genre}-publisher={publisher}-tag={tag}-pegi={pegi}-console={console}")
+	public Response researchP(@PathParam("name") String name, 
+			@PathParam("genre") String genre,
+			@PathParam("publisher") String publisher,
+			@PathParam("tag") String tag,
+			@PathParam("pegi") String pegi,
+			@PathParam("console") String console,
+			@Context HttpRequest request)
+	{
+		List list =	ProductDatabase.researchProduct(name, genre, publisher, tag, pegi, console);
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		String json = "[]";
+		try {
+			json = mapper.writeValueAsString(list);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+
+		ResponseBuilder rb;
+		if(json.isEmpty())
+		{
+			rb = Response.serverError().status(404);
+		}
+		else
+		{
+			rb = Response.ok(json).status(200);
+		}		
+		return rb.build();
+	}
+	
+	
 	@PermitAll
 	@GET
 	@Path("/products/name={name}-genre={genre}-publisher={publisher}-tag={tag}-pegi={pegi}-console={console}")
@@ -506,6 +580,33 @@ public class ProductService
 	@POST
 	@Path("/pegi/{name}/{link}")
 	public Response addPegi(@PathParam("name") String name,
+			@PathParam("link") String img
+			,@Context HttpRequest request)
+	{
+		PegiClassification pegi = ProductDatabase.findPegiByName(name);
+		if(pegi == null){
+			pegi = new PegiClassification();
+			pegi.setName(name);
+			pegi.setImg(img);
+
+			ProductDatabase.insertPegi(pegi);
+
+			pegi = ProductDatabase.findPegiByName(name);
+			return Response.ok(pegi.getProperties())
+					.status(200)
+					.build();
+		}
+		else
+		{
+			return Response.ok().status(500).build();
+		}
+	}
+	
+
+	@RolesAllowed({"ADMIN"})
+	@POST
+	@Path("/research/{name}/{link}")
+	public Response research(@PathParam("name") String name,
 			@PathParam("link") String img
 			,@Context HttpRequest request)
 	{
