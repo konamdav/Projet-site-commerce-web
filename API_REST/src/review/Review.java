@@ -11,7 +11,6 @@ import javax.persistence.OneToOne;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import generic.DataBaseEntity;
-import generic.Functions;
 import product.Product;
 import user.User;
 
@@ -58,10 +57,9 @@ public class Review extends DataBaseEntity{
 		this.note = note;
 	}
 
+
 	
-/*
- * 
- * 
+
 	public Product getProduct() {
 		return product;
 	}
@@ -69,12 +67,13 @@ public class Review extends DataBaseEntity{
 	public void setProduct(Product product) {
 		this.product = product;
 	}
-*
-*
-*/
 	
 	public User getUser() {
 		return user;
+	}
+	
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public String getTitle() {
@@ -82,7 +81,7 @@ public class Review extends DataBaseEntity{
 	}
 
 	public void setTitle(String title) {
-		this.title = Functions.stringToHtmlString(title);
+		this.title = title;
 	}
 
 	public String getContent() {
@@ -90,7 +89,7 @@ public class Review extends DataBaseEntity{
 	}
 
 	public void setContent(String content) {
-		this.content = Functions.stringToHtmlString(content);
+		this.content = content;
 	}
 
 }
