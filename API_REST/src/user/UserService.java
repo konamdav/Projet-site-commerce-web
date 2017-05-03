@@ -92,7 +92,7 @@ public class UserService
 	public Response disconnectUser(@Context HttpServletRequest  request)
 	{
 		User user = (User) request.getSession().getAttribute("USER");
-		ResponseBuilder rb;
+		ResponseBuilder rb = null;
 		if(user == null)
 		{
 			rb = Response.serverError().status(404);
@@ -105,7 +105,7 @@ public class UserService
 			}
 			else
 			{
-				request.removeAttribute("INTERCEPTOR-ID-USER");
+				request.getSession().removeAttribute("USER");
 				request.getSession().invalidate();
 			}
 		}
