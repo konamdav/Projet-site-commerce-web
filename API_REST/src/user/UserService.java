@@ -84,6 +84,33 @@ public class UserService
 
 		return rb.build();
 	}
+	
+	
+	@PermitAll
+	@GET
+	@Path("/disconnect")
+	public Response disconnectUser(@Context HttpServletRequest  request)
+	{
+		User user = (User) request.getSession().getAttribute("USER");
+		ResponseBuilder rb;
+		if(user == null)
+		{
+			rb = Response.serverError().status(404);
+		}
+		else 
+		{
+			if(request.getAttribute("INTERCEPTOR-ID-USER")==null || user.getId() != (int)request.getAttribute("INTERCEPTOR-ID-USER"))
+			{
+				rb = Response.serverError().status(403);
+			}
+			else
+			{
+				request.removeAttribute("INTERCEPTOR-ID-USER");
+				request.getSession().invalidate();
+			}
+		}
+		return rb.build();
+	}
 
 	@RolesAllowed({"ADMIN", "USER"})
 	@GET
