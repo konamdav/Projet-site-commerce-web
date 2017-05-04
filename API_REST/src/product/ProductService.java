@@ -333,7 +333,34 @@ public class ProductService
 		return response;
 	}
 
+	@RolesAllowed({"ADMIN"})
+	@POST
+	@Path("/videogames/{id_videogame}/tag/{id_tag}")
+	public Response addTag(@PathParam("id_videogame") int id_videogame,
+			@PathParam("id_tag") int id_genre,
+			@Context HttpRequest request)
+	{
+		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame);
+		Tag tag = ProductDatabase.findTagByID(id_genre);
+		Response response;
 
+		if(videogame != null && tag !=null  && !videogame.getGenres().contains(tag))
+		{
+			videogame.getTags().add(tag);
+			ProductDatabase.insertVideoGame(videogame);
+
+			videogame = ProductDatabase.findVideoGameByID(id_videogame);
+			response = Response.ok(videogame.getProperties()).build();
+
+		}
+		else
+		{
+			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
+		}
+
+		return response;
+	}
+	
 	@RolesAllowed({"ADMIN"})
 	@PUT
 	@Path("/videogames/{id_videogame}/{name}/{id_publisher}")

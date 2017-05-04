@@ -179,6 +179,15 @@ public class ProductDatabase extends Database{
 
 	}
 	
+	public static Tag findTagByID(int id)
+	{
+		session.beginTransaction();
+		Tag tag = (Tag) session.get(Tag.class,id);
+		session.getTransaction().commit();
+		return tag;
+
+	}
+	
 	public static Review findReviewByID(int id)
 	{
 		session.beginTransaction();
