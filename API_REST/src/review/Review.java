@@ -21,14 +21,11 @@ public class Review extends DataBaseEntity{
 	@Column 
 	private int note;
 
-	@ManyToOne(optional = false)
-    @JoinColumn(name = "id_user")
-	private User user;
+	@Column
+	private int id_user;
 	
-	
-	@ManyToOne(optional = false)
-    @JoinColumn(name = "id_product")
-	private Product product;
+	@Column
+	private int  id_product;
 
 	@Column
 	private String title;
@@ -57,23 +54,24 @@ public class Review extends DataBaseEntity{
 		this.note = note;
 	}
 
-
 	
-
-	public Product getProduct() {
-		return product;
+	
+	public int getId_product() {
+		return id_product;
 	}
 
-	public void setProduct(Product product) {
-		this.product = product;
+	public void setId_product(int id_product) {
+		this.id_product = id_product;
 	}
-	
-	public User getUser() {
-		return user;
+
+
+
+	public int getId_user() {
+		return id_user;
 	}
-	
-	public void setUser(User user) {
-		this.user = user;
+
+	public void setId_user(int id_user) {
+		this.id_user = id_user;
 	}
 
 	public String getTitle() {

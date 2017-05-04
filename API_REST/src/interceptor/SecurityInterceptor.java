@@ -44,9 +44,9 @@ public class SecurityInterceptor implements PreProcessInterceptor
 {
 	private static final String AUTHORIZATION_PROPERTY = "Authorization";
 	private static final String AUTHENTICATION_SCHEME = "Basic";
-	private static final ServerResponse ACCESS_DENIED = new ServerResponse("Access denied for this resource", 401, new Headers<Object>());;
-	private static final ServerResponse ACCESS_FORBIDDEN = new ServerResponse("Nobody can access this resource", 403, new Headers<Object>());;
-	private static final ServerResponse SERVER_ERROR = new ServerResponse("INTERNAL SERVER ERROR", 500, new Headers<Object>());;
+	private static final ServerResponse ACCESS_DENIED = new ServerResponse("Access denied for this resource", 401, new Headers<Object>());
+	private static final ServerResponse ACCESS_FORBIDDEN = new ServerResponse("Nobody can access this resource", 403, new Headers<Object>());
+	private static final ServerResponse SERVER_ERROR = new ServerResponse("INTERNAL SERVER ERROR", 500, new Headers<Object>());
 
 
 	@Override
@@ -55,35 +55,34 @@ public class SecurityInterceptor implements PreProcessInterceptor
 
 		Method method = methodInvoked.getMethod();
 
-		//Access allowed for all 
+		
 		if(method.isAnnotationPresent(PermitAll.class))
 		{
 			return null;
 		}
-		//Access denied for all 
+		
 		if(method.isAnnotationPresent(DenyAll.class))
 		{
 			return ACCESS_FORBIDDEN;
 		}
 
-		//Get request headers
+		
 		final HttpHeaders headers = request.getHttpHeaders();
 		
 		
 		
-		//Fetch authorization header
+		
 		final List<String> authorization = headers.getRequestHeader(AUTHORIZATION_PROPERTY);
 
-		//If no authorization information present; block access
+		
 		if(authorization == null || authorization.isEmpty())
 		{
 			return ACCESS_DENIED;
 		}
 
-		//Get encoded username and password
+		
 		final String encodedUserPassword = authorization.get(0).replaceFirst(AUTHENTICATION_SCHEME + " ", "");
 
-		//Decode username and password
 		String usernameAndPassword;
 		try {
 			usernameAndPassword = new String(Base64.decode(encodedUserPassword));
@@ -91,7 +90,7 @@ public class SecurityInterceptor implements PreProcessInterceptor
 			return SERVER_ERROR;
 		}
 
-		//Split username and password tokens
+		
 		final StringTokenizer tokenizer = new StringTokenizer(usernameAndPassword, ":");
 		final String username = tokenizer.nextToken();
 		final String password = tokenizer.nextToken();
@@ -101,13 +100,13 @@ public class SecurityInterceptor implements PreProcessInterceptor
 		System.out.println(password);
 
 
-		//Verify user access
+		
 		if(method.isAnnotationPresent(RolesAllowed.class))
 		{
 			RolesAllowed rolesAnnotation = method.getAnnotation(RolesAllowed.class);
 			Set<String> rolesSet = new HashSet<String>(Arrays.asList(rolesAnnotation.value()));
 
-			//Is user valid?
+			
 			if( ! isUserAllowed(username, password, rolesSet, request))
 			{
 				return ACCESS_DENIED;
@@ -138,7 +137,7 @@ public class SecurityInterceptor implements PreProcessInterceptor
 		}
 		else
 		{
-			System.out.println("bad auth :/"+user.getProperties());
+			//System.out.println("bad auth :/"+user.getProperties());
 		}
 		return isAllowed;
 	}

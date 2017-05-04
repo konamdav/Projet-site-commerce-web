@@ -50,21 +50,21 @@ public class ProductDatabase extends Database{
 	{
 		SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
 		Session session  = sessionFactory.openSession();
-		String request = "select p.videogame from product.Product as p "; //join genre.Genre as g join videogame.VideoGame as v join publisher.Publisher as pub";//, pegi_classification.PegiClassification as peg ";
-		if(!rp.videogame.equals("null") || !rp.publisher.equals("null") ||!rp.console.equals("null") || rp.tags.size() >0 || rp.genres.size() >0 || rp.pegis.size() >0) 
+		String request = "select p from product.Product as p "; //join genre.Genre as g join videogame.VideoGame as v join publisher.Publisher as pub";//, pegi_classification.PegiClassification as peg ";
+		if(!rp.videogame.equals("") || !rp.publisher.equals("") ||!rp.console.equals("") || rp.tags.size() >0 || rp.genres.size() >0 || rp.pegis.size() >0) 
 		{
 			request += " where ";
-			if(!rp.videogame.equals("null")) request += "p.videogame.name = '" + rp.videogame + "' AND ";
-			if(!rp.console.equals("null")) request += "p.videogame.console.name = '" + rp.console + "' AND ";
-			if(!rp.publisher.equals("null")) request +="p.videogame.publisher.name = '" + rp.publisher + "' AND ";
+			if(!rp.videogame.equals("")) request += "p.videogame.name = '" + rp.videogame + "' AND ";
+			if(!rp.console.equals("")) request += "p.console.name = '" + rp.console + "' AND ";
+			if(!rp.publisher.equals("")) request +="p.videogame.publisher.name = '" + rp.publisher + "' AND ";
 			for(int i = 0; i<rp.tags.size() ; i++){
-				if(!rp.tags.get(i).equals("null")) request += "(select g from tag.Genre as g where g.name = '" + rp.tags.get(i) + "') in elements(p.videogame.genres) AND ";
+				if(!rp.tags.get(i).equals("")) request += "(select g from tag.Genre as g where g.name = '" + rp.tags.get(i) + "') in elements(p.videogame.genres) AND ";
 			}
 			for(int i = 0; i<rp.pegis.size() ; i++){
-				if(!rp.pegis.get(i).equals("null")) request += "(select g from pegi_classification.PegiClassification as g where g.name = '" + rp.pegis.get(i) + "') in elements(p.videogame.PegiClassification) AND ";
+				if(!rp.pegis.get(i).equals("")) request += "(select g from pegi_classification.PegiClassification as g where g.name = '" + rp.pegis.get(i) + "') in elements(p.videogame.PegiClassification) AND ";
 			}
 			for(int i = 0; i<rp.genres.size() ; i++){
-				if(!rp.genres.get(i).equals("null")) request += "(select g from genre.Genre as g where g.name = '" + rp.genres.get(i) + "') in elements(p.videogame.genres) AND ";
+				if(!rp.genres.get(i).equals("")) request += "(select g from genre.Genre as g where g.name = '" + rp.genres.get(i) + "') in elements(p.videogame.genres) AND ";
 			}
 			request = request.substring(0, request.length()-5);
 		}
@@ -83,15 +83,15 @@ public class ProductDatabase extends Database{
 		SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
 		Session session  = sessionFactory.openSession();
 		String request = "select p.videogame from product.Product as p "; //join genre.Genre as g join videogame.VideoGame as v join publisher.Publisher as pub";//, pegi_classification.PegiClassification as peg ";
-		if(!name.equals("null") || !name.equals("null") ||!genre.equals("null")) 
+		if(!name.equals("") || !name.equals("") ||!genre.equals("")) 
 		{
 			request += " where ";
-			if(!name.equals("null")) request += "p.videogame.name = '" + name + "' AND ";
-			if(!genre.equals("null")) request += "(select g from genre.Genre as g where g.name = '" + genre + "') in elements(p.videogame.genres) AND ";
-			if(!publisher.equals("null")) request +="p.videogame.publisher.name = '" + publisher + "' AND ";
-			if(!tag.equals("null")) request += "(select g from tag.Genre as g where g.name = '" + genre + "') in elements(p.videogame.genres) AND ";
-			if(!pegi.equals("null")) request += "(select g from pegi_classification.PegiClassification as g where g.name = '" + genre + "') in elements(p.videogame.PegiClassification) AND ";
-			if(!console.equals("null")) request += "p.videogame.console.name = '" + console + "' AND ";
+			if(!name.equals("")) request += "p.videogame.name = '" + name + "' AND ";
+			if(!genre.equals("")) request += "(select g from genre.Genre as g where g.name = '" + genre + "') in elements(p.videogame.genres) AND ";
+			if(!publisher.equals("")) request +="p.videogame.publisher.name = '" + publisher + "' AND ";
+			if(!tag.equals("")) request += "(select g from tag.Genre as g where g.name = '" + genre + "') in elements(p.videogame.genres) AND ";
+			if(!pegi.equals("")) request += "(select g from pegi_classification.PegiClassification as g where g.name = '" + genre + "') in elements(p.videogame.PegiClassification) AND ";
+			if(!console.equals("")) request += "p.videogame.console.name = '" + console + "' AND ";
 			request = request.substring(0, request.length()-5);
 		}
 		Query query = session.createQuery(request);
@@ -201,8 +201,8 @@ public class ProductDatabase extends Database{
 	{
 		
 		return (Review) session.createCriteria(Review.class)
-				.add(Restrictions.eq("user", user))
-				.add(Restrictions.eq("product", product))
+				.add(Restrictions.eq("id_user", user.getId()))
+				.add(Restrictions.eq("id_product", product.getId()))
 				.uniqueResult();
 	}
 	
@@ -218,10 +218,14 @@ public class ProductDatabase extends Database{
 	
 	public static Tag findTagByName(String name)
 	{
+		session.beginTransaction();
 		
-		return (Tag) session.createCriteria(Tag.class)
+		Tag tag = (Tag) session.createCriteria(Tag.class)
 				.add(Restrictions.eq("name", name))
 				.uniqueResult();
+		
+		session.getTransaction().commit();
+		return tag;
 	}
 	
 	public static Picture findPictureByName(String name)
@@ -248,6 +252,24 @@ public class ProductDatabase extends Database{
 		return videogame;
 
 	}
+	
+	public static PegiClassification findPegiByID(int id)
+	{
+		session.beginTransaction();
+		PegiClassification pegi = (PegiClassification) session.get(VideoGame.class,id);
+		session.getTransaction().commit();
+		return pegi;
+
+	}
+	
+
+	public static VideoGame findVideoGameByName(String name)
+	{
+		return (VideoGame) session.createCriteria(VideoGame.class)
+				.add(Restrictions.eq("name", name))
+				.uniqueResult();
+
+	}
 
 	public static Genre findGenreByName(String name) {
 		
@@ -264,7 +286,27 @@ public class ProductDatabase extends Database{
 
 
 	
-	public static List findAll()
+	public static List findAllProducts()
+	{
+		return session.createCriteria(Product.class).list();
+		
+	}
+	
+	public static List findAllPublishers()
+	{
+		return session.createCriteria(Publisher.class).list();
+		
+	}
+	
+	public static List findAllConsoles()
+	{
+		return session.createCriteria(Console.class).list();
+		
+	}
+	
+	
+	
+	public static List findAllVideoGames()
 	{
 		return session.createCriteria(Product.class).list();
 		
@@ -275,6 +317,30 @@ public class ProductDatabase extends Database{
 		session.beginTransaction();
 		
 		session.save(product);
+		session.getTransaction().commit();
+	}
+	
+	public static void insertTag(Tag tag)
+	{
+		session.beginTransaction();
+		session.save(tag);
+		session.getTransaction().commit();
+	}
+	
+	
+	public static void insertTag(Tag tag, VideoGame vg)
+	{
+		session.beginTransaction();
+		session.save(tag);
+		//session.save(vg);
+		session.getTransaction().commit();
+	}
+	
+	public static void insertVideoGame(VideoGame videoGame)
+	{
+		session.beginTransaction();
+		
+		session.save(videoGame);
 		session.getTransaction().commit();
 	}
 
@@ -323,12 +389,5 @@ public class ProductDatabase extends Database{
 		
 	}
 
-	public static List findAllSameProducts(Product product) {
-		return session.createCriteria(Product.class)
-				.add(Restrictions.ne("id", product.getId()))
-				.createAlias("videogame", "vg")
-				//.add(Restrictions.eq("vg.id_publisher", product.getVideogame().getPublisher().getId()))
-				.list();
-		
-	}
+
 }

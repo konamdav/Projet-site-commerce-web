@@ -4,7 +4,7 @@ package user;
 
 
 import java.text.SimpleDateFormat;
-
+import java.util.Date;
 
 import javax.annotation.security.*;
 import javax.interceptor.Interceptors;
@@ -21,6 +21,8 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.jboss.resteasy.core.Headers;
+import org.jboss.resteasy.core.ServerResponse;
 import org.jboss.resteasy.spi.HttpRequest;
 import org.jboss.resteasy.util.Base64;
 import org.json.JSONException;
@@ -36,148 +38,185 @@ import command.LineCommand;
 import generic.Functions;
 import product.Product;
 import product.ProductDatabase;
+import review.Review;
 
 
-
+/***
+ * Webservice user
+ * @author Davy
+ *
+ */
 @Path("/users-service")
 public class UserService
 {
+	/** get connected user **/
 	@RolesAllowed({"ADMIN", "USER"})
 	@GET
 	@Path("/user")
-	public Response getUserById(@Context HttpServletRequest request)
+	public Response getUser(@Context HttpServletRequest request)
 	{
 		User user = (User) request.getSession().getAttribute("USER");
 
-		ResponseBuilder rb;
+		Response response;
 		if(user == null)
 		{
-			rb = Response.serverError().status(404);
+			response = new ServerResponse("USER NOT FOUND", 404, new Headers<Object>());
 		}
 		else if(request.getAttribute("INTERCEPTOR-ID-USER")==null || user.getId() != (int)request.getAttribute("INTERCEPTOR-ID-USER"))
 		{
-			rb = Response.serverError().status(403);
+			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 		}
 		else
 		{
-			rb = Response.ok(user.getProperties());
+			response = Response.ok(user.getProperties()).build();
 		}		
-		return rb.build();
+		return response;
 	}
 
+	/***
+	 * Connect user
+	 * @param username
+	 * @param password
+	 * @param request
+	 * @return
+	 */
 	@PermitAll
-	@GET
+	@PUT
 	@Path("/connect/{username}/{password}")
 	public Response connectUser(@PathParam("username") String username, @PathParam("password") String password, @Context HttpServletRequest  request)
 	{
 		User user = UserDatabase.findByCriteria(username, password);
-		ResponseBuilder rb;
+		Response  response;
 		if(user == null)
 		{
-			rb = Response.serverError().status(403);
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
 		}
 		else
 		{
 			request.getSession().setAttribute("USER", user);
-			rb = Response.ok(user.getProperties());
+			response = Response.ok(user.getProperties()).build();
 		}
 
-		return rb.build();
+		return response;
 	}
 	
 	
-	@PermitAll
-	@GET
+	/**
+	 * Disconnect user
+	 * @param request
+	 * @return
+	 */
+	@RolesAllowed({"USER", "ADMIN"})
+	@PUT
 	@Path("/disconnect")
 	public Response disconnectUser(@Context HttpServletRequest  request)
 	{
+		System.out.println("disconnect");
 		User user = (User) request.getSession().getAttribute("USER");
-		ResponseBuilder rb = null;
+		Response response = null;
 		if(user == null)
 		{
-			rb = Response.serverError().status(404);
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
 		}
 		else 
 		{
 			if(request.getAttribute("INTERCEPTOR-ID-USER")==null || user.getId() != (int)request.getAttribute("INTERCEPTOR-ID-USER"))
 			{
-				rb = Response.serverError().status(403);
+				response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 			}
 			else
 			{
 				request.getSession().removeAttribute("USER");
 				request.getSession().invalidate();
+				response = Response.ok("SUCCESS").build();
 			}
 		}
-		return rb.build();
+		return response;
 	}
 
+	/**
+	 * Get command
+	 * @param id_command
+	 * @param request
+	 * @return
+	 */
 	@RolesAllowed({"ADMIN", "USER"})
 	@GET
 	@Path("/user/commands/{id_command}")
 	public Response getCommandById(@PathParam("id_command") int id_command, @Context HttpServletRequest request)
 	{
 		User user = (User) request.getSession().getAttribute("USER");
-		ResponseBuilder rb;
+		Response response;
 		if(user == null)
 		{
-			rb = Response.serverError().status(404);
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
 		}
 		else 
 		{
 			if(request.getAttribute("INTERCEPTOR-ID-USER")==null || user.getId() != (int)request.getAttribute("INTERCEPTOR-ID-USER"))
 			{
-				rb = Response.serverError().status(403);
+				response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 			}
 			else
 			{
 				Command command = UserDatabase.findCommand(id_command);
-				if(command == null)
+				if(command == null || command.getId_user()!= user.getId())
 				{
-					rb = Response.serverError().status(404);
+					response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
 				}
 				else {
-					rb = Response.ok(command.getProperties());
+					response = Response.ok(command.getProperties()).build();
 				}	
 			}
 		}
-		return rb.build();
+		return response;
 	}
 
 
+	/**
+	 * Get user panier
+	 * @param request
+	 * @return
+	 */
 	@PermitAll
 	@GET
 	@Path("/user/panier")
 	public Response getPanier(@Context HttpServletRequest request)
 	{
-		ResponseBuilder rb;
+		Response response;
 		Command command = Functions.getPanier(request);
 		if(command == null)
 		{
-			rb = Response.serverError().status(404);
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
 		}
 		else {
-			rb = Response.ok(command.getProperties());
+			response = Response.ok(command.getProperties()).build();
 		}	
-		return rb.build();
+		return response;
 	}
 
+	/**
+	 * Get commands 
+	 * @param request
+	 * @return
+	 * @throws JSONException
+	 */
 	@RolesAllowed({"ADMIN", "USER"})
 	@GET
 	@Path("user/commands")
 	public Response getCommands(@Context HttpServletRequest request) throws JSONException
 	{
 		User user = (User) request.getSession().getAttribute("USER");
-		ResponseBuilder rb;
+		Response response ;
 		if(user == null)
 		{
-			rb = Response.serverError().status(404);
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
 		}
 		else 
 		{
 			if(request.getAttribute("INTERCEPTOR-ID-USER")==null || user.getId() != (int)request.getAttribute("INTERCEPTOR-ID-USER"))
 			{
-				rb = Response.serverError().status(403);
+				response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 			}
 			else
 			{
@@ -190,12 +229,18 @@ public class UserService
 					e.printStackTrace();
 				}
 
-				rb = Response.ok(json);
+				response = Response.ok(json).build();
 			}	
 		}
-		return rb.build();
+		return response;
 	}
 
+	/**
+	 * Pay the command
+	 * @param request
+	 * @return
+	 * @throws JSONException
+	 */
 	@RolesAllowed({"ADMIN", "USER"})
 	@PUT
 	@Path("user/panier/pay")
@@ -203,16 +248,16 @@ public class UserService
 	{
 		User user = (User) request.getSession().getAttribute("USER");
 
-		ResponseBuilder rb;
+		Response  response;
 		if(user == null)
 		{
-			rb = Response.serverError().status(404);
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
 		}
 		else 
 		{
 			if(request.getAttribute("INTERCEPTOR-ID-USER")==null || user.getId() != (int)request.getAttribute("INTERCEPTOR-ID-USER"))
 			{
-				rb = Response.serverError().status(403);
+				response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 			}
 			else
 			{
@@ -220,25 +265,40 @@ public class UserService
 				command.setId_user(user.getId());
 				if(command == null  || command.getLinecommands().isEmpty())
 				{
-					rb = Response.serverError().status(403);
+					response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 				}
 				else
 				{
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					command.setDate_command(sdf.toString());
+					command.setDate_command(sdf.format(new Date()));
 					UserDatabase.saveCommand(command);	
+					
+					Command newCommand = UserDatabase.findLastCommand(user.getId());
+					
+					for (LineCommand lc : command.getLinecommands())
+					{
+						lc.setId_command(newCommand.getId());
+						UserDatabase.saveLineCommand(lc);
+					}
 					
 					Functions.newPanier(request);
 					
 					String json = command.getProperties();
-					rb = Response.ok(json);
+					response = Response.ok(json).build();
 				}
 			}	
 		}
-		return rb.build();
+		return response;
 	}
 
 
+	/**
+	 * Delete line command
+	 * @param id_product
+	 * @param request
+	 * @return
+	 * @throws JSONException
+	 */
 	@RolesAllowed({"ADMIN", "USER"})
 	@DELETE
 	@Path("user/panier/{id_product}")
@@ -246,44 +306,52 @@ public class UserService
 			@Context HttpServletRequest request) throws JSONException
 	{
 		User user = (User) request.getSession().getAttribute("USER");
-		ResponseBuilder rb;
+		Response response;
 		if(user == null)
 		{
-			rb = Response.serverError().status(404);
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
 		}
 		else 
 		{
 			if(request.getAttribute("INTERCEPTOR-ID-USER")==null || user.getId() != (int)request.getAttribute("INTERCEPTOR-ID-USER"))
 			{
-				rb = Response.serverError().status(403);
+				response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 			}
 			else
 			{
 				Command command = Functions.getPanier(request);
 				Product product = ProductDatabase.findProductByID(id_product);
 				if(command == null || product == null){
-					rb = Response.serverError().status(403);
+					response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 				}
 				else
 				{	
 					LineCommand  linecmd = command.findLineCommand(product);
 					if(linecmd == null)
 					{
-						rb = Response.serverError().status(403);
+						response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 					}
 					else
 					{
 						LineCommand line = command.removeLineCommand(linecmd);
 						String json = line.getProperties();
-						rb = Response.ok(json);
+						response = Response.ok(json).build();
 					}
 
 				}
 			}	
 		}
-		return rb.build();
+		return response;
 	}
 
+	/**
+	 * add a product
+	 * @param id_product
+	 * @param qt
+	 * @param request
+	 * @return
+	 * @throws JSONException
+	 */
 	@PermitAll
 	@POST
 	@Path("user/panier/add/{id_product}/{qt}")
@@ -291,32 +359,39 @@ public class UserService
 			@Context HttpServletRequest request) throws JSONException
 	{
 
-		ResponseBuilder rb;
+		Response response;
 		Command command = Functions.getPanier(request);
 		if(command == null)
 		{
-			rb = Response.serverError().status(403);
+			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 		}
 		else
 		{	
 			Product  product = ProductDatabase.findProductByID(id_product);
 			if(product == null)
 			{
-				rb = Response.serverError().status(403);
+				response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 			}
 			else
 			{
 				LineCommand line = command.addLineCommand(product, qt);
 				String json = line.getProperties();
-				rb = Response.ok(json);
+				response = Response.ok(json).build();
 			}
 		}
 
-		return rb.build();
+		return response;
 	}
 
 
-
+/**
+ * New line commmand
+ * @param id_product
+ * @param qt
+ * @param request
+ * @return
+ * @throws JSONException
+ */
 	@PermitAll
 	@PUT
 	@Path("user/panier/{id_product}/{qt}")
@@ -325,47 +400,52 @@ public class UserService
 	{
 
 
-		ResponseBuilder rb;
+		Response response;
 
 		Command command = Functions.getPanier(request);
 		Product product = ProductDatabase.findProductByID(id_product);
 		if(product == null || command == null)
 		{
-			rb = Response.serverError().status(403);
+			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 		}
 		else
 		{	
 			LineCommand line = command.findLineCommand(product);
 			if(line == null || line.getId_command() !=command.getId())
 			{
-				rb = Response.serverError().status(403);
+				response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 			}
 			else
 			{
 				line.setQuantity(qt);
 				String json = line.getProperties();
-				rb = Response.ok(json);
+				response = Response.ok(json).build();
 			}			
 		}
-		return rb.build();
+		return response;
 	}
 
+	/***
+	 * Get review
+	 * @param request
+	 * @return
+	 */
 	@RolesAllowed({"ADMIN", "USER"})
 	@GET
 	@Path("/user/reviews")
 	public Response getReviews(@Context HttpServletRequest request)
 	{
 		User user = (User) request.getSession().getAttribute("USER");
-		ResponseBuilder rb;
+		Response response;
 		if(user == null)
 		{
-			rb = Response.serverError().status(404);
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
 		}
 		else 
 		{
 			if(request.getAttribute("INTERCEPTOR-ID-USER")==null || user.getId() != (int)request.getAttribute("INTERCEPTOR-ID-USER"))
 			{
-				rb = Response.serverError().status(403);
+				response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 			}
 			else
 			{
@@ -378,13 +458,24 @@ public class UserService
 					e.printStackTrace();
 				}
 
-				rb = Response.ok(json);
+				response = Response.ok(json).build();
 			}	
 		}
-		return rb.build();
+		return response;
 	}
+	
+	
 
 
+	/**
+	 * Sign in
+	 * @param username
+	 * @param password
+	 * @param firstname
+	 * @param surname
+	 * @param mail
+	 * @return
+	 */
 	@PermitAll
 	@POST
 	@Path("/user/{username}/{password}/{firstname}/{surname}/{mail}")
@@ -398,6 +489,7 @@ public class UserService
 			user = new User();
 			user.setFirstname(firstname);
 			user.setMail(mail);
+			user.setRole("USER");
 			user.setSurname(surname);
 			user.setUsername(username);
 			user.setPassword(password);
@@ -413,6 +505,18 @@ public class UserService
 		}
 	}
 
+	
+	/**
+	 * Update user
+	 * @param username
+	 * @param password
+	 * @param firstname
+	 * @param surname
+	 * @param mail
+	 * @param request
+	 * @return
+	 */
+	
 	@RolesAllowed({"ADMIN", "USER"})
 	@PUT
 	@Path("/user/{username}/{password}/{firstname}/{surname}/{mail}")
@@ -424,16 +528,16 @@ public class UserService
 		
 		User user = (User) request.getSession().getAttribute("USER");	
 
-		ResponseBuilder rb;
+		Response response;
 		if(user == null)
 		{
-			rb = Response.serverError().status(404);
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
 		}
 		else 
 		{
 			if(	request.getAttribute("INTERCEPTOR-ID-USER")==null || user.getId() != (int)request.getAttribute("INTERCEPTOR-ID-USER"))
 			{
-				rb = Response.serverError().status(403);
+				response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 			}
 			else
 			{
@@ -447,23 +551,30 @@ public class UserService
 				UserDatabase.saveUser(user);
 				json = user.getProperties();
 
-				rb = Response.ok(json);
+				response = Response.ok(json).build();
 			}	
 		}
-		return rb.build();
+		return response;
 	}
 
 
+	/**
+	 * Update role user
+	 * @param id
+	 * @param role
+	 * @param request
+	 * @return
+	 */
 	@RolesAllowed({"ADMIN"})
 	@PUT
 	@Path("/user/role/{id}/{role}")
 	public Response updateRoleUser(@PathParam("id") int id, @PathParam("role") String role, @Context HttpRequest request)
 	{
 		User user = UserDatabase.findUserByID(id);
-		ResponseBuilder rb;
+		Response response;
 		if(user == null)
 		{
-			rb = Response.serverError().status(404);
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
 		}
 		else 
 		{
@@ -480,9 +591,9 @@ public class UserService
 			UserDatabase.saveUser(user);
 			json = user.getProperties();
 
-			rb = Response.ok(json);
+			response = Response.ok(json).build();
 
 		}
-		return rb.build();
+		return response;
 	}
 }

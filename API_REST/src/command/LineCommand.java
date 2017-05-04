@@ -24,17 +24,17 @@ public class LineCommand extends DataBaseEntity{
 	private int quantity = 0;
 	
 	@Column
-	private int price;
+	private double price;
 
 	public LineCommand() {
 		super();
 	}
 
-	public int getPrice() {
+	public double getPrice() {
 		return price;
 	}
 
-	public void setPrice(int price) {
+	public void setPrice(double price) {
 		this.price = price;
 	}
 

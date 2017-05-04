@@ -1,5 +1,6 @@
 package product;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -20,12 +21,11 @@ import videogame.VideoGame;
 
 @Entity
 public class Product extends DataBaseEntity{
-
 	@Id
 	private int id;
 	
 	@Column 
-	private int price;
+	private double price;
 
 
 	@OneToOne
@@ -41,10 +41,10 @@ public class Product extends DataBaseEntity{
 	private String date_release;
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id_product")
-	private List<Picture> pictures;
+	private List<Picture> pictures = new ArrayList<Picture>();
 	
-	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-	private List<Review> reviews;
+	@OneToMany(mappedBy = "id_product")
+	private List<Review> reviews  = new ArrayList<Review>();
 	
 	public List<Review> getReviews() {
 		return reviews;
@@ -62,11 +62,11 @@ public class Product extends DataBaseEntity{
 	}
 	
 
-	public int getPrice() {
+	public double getPrice() {
 		return price;
 	}
 
-	public void setPrice(int price) {
+	public void setPrice(double price) {
 		this.price = price;
 	}
 	

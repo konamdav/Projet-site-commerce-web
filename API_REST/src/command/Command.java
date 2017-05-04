@@ -5,6 +5,8 @@ import java.util.Set;
 
 import javax.persistence.*;
 
+import org.hibernate.annotations.Cascade;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import generic.DataBaseEntity;
@@ -26,6 +28,7 @@ public class Command extends DataBaseEntity{
 		this.linecommands = linecommands;
 	}
 
+	//@Cascade(value={org.hibernate.annotations.CascadeType.ALL})
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id_command")
 	private Set<LineCommand> linecommands = new LinkedHashSet<LineCommand>();
 

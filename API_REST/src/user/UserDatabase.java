@@ -6,6 +6,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.criterion.Example;
 import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import command.Command;
@@ -15,7 +16,7 @@ import product.Product;
 
 public class UserDatabase extends Database{
 	private static Session session  = Database.session;
-	
+
 	public static User findUserByID(int id)
 	{
 		session.beginTransaction();
@@ -27,7 +28,7 @@ public class UserDatabase extends Database{
 
 	public static User findByCriteria(String username, String password)
 	{
-		
+
 		User resUser = (User) session.createCriteria(User.class)
 				.add(Restrictions.and(
 						Restrictions.eq("username", username),
@@ -35,19 +36,19 @@ public class UserDatabase extends Database{
 						)).uniqueResult();
 		return resUser;
 	}
-	
+
 	public static User findByCriteria(String username)
 	{
-		
+
 		User resUser = (User) session.createCriteria(User.class)
 				.add(Restrictions.eq("username", username))
 				.uniqueResult();
 		return resUser;
 	}
-	
+
 	public static List findCommands(int id_user)
 	{
-		
+
 		return session.createCriteria(Command.class)
 				.add(Restrictions.eq("id_user", id_user))
 				.list();		
@@ -56,18 +57,18 @@ public class UserDatabase extends Database{
 	public static void saveUser(User user)
 	{
 		session.beginTransaction();
-		
+
 		session.save(user);
 		session.getTransaction().commit();
 	}
-	
+
 	public static void saveCommand(Command command)
 	{
 		session.beginTransaction();
 		session.save(command);
 		session.getTransaction().commit();
 	}
-	
+
 	public static void saveLineCommand(LineCommand lineCommand)
 	{
 		session.beginTransaction();
@@ -76,20 +77,29 @@ public class UserDatabase extends Database{
 	}
 
 	public static Command findCommand(int id_command) {
-		
+
 		session.beginTransaction();
 		Command cmd = (Command) session.get(Command.class,id_command);
 		session.getTransaction().commit();
 		return cmd;
 	}
-	
-public static LineCommand findLineCommand(int id_linecommand) {
-		
+
+	public static Command findLastCommand(int id_user) {
+
+		return (Command) session.createCriteria(Command.class)
+				.addOrder(Order.desc("id"))
+				.add(Restrictions.eq("id_user", id_user))
+				.setMaxResults(1)
+				.uniqueResult();		
+	}
+
+	public static LineCommand findLineCommand(int id_linecommand) {
+
 		session.beginTransaction();
 		LineCommand linecmd = (LineCommand) session.get(LineCommand.class,id_linecommand);
 		session.getTransaction().commit();
 		return linecmd;
 	}
-	
-	
+
+
 }
