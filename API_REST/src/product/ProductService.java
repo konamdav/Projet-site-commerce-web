@@ -210,14 +210,14 @@ public class ProductService
 			@PathParam("id_console") int id_console,
 			@PathParam("price") double price,
 			@PathParam("date") String date,
-			@Context HttpRequest request)
+			@Context HttpServletRequest request)
 	{
 		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame);
 		Console console = ProductDatabase.findConsoleByID(id_console);
 
 		Response response;
 
-		if(videogame!= null && console!=null)
+		if(request.getSession().getAttribute("USER")!=null && videogame!= null && console!=null)
 		{
 			Product product = ProductDatabase.findProductByKey(videogame, console);			
 			if(product != null)
@@ -333,18 +333,37 @@ public class ProductService
 		return response;
 	}
 
+	
 	@RolesAllowed({"ADMIN"})
 	@POST
-	@Path("/videogames/{id_videogame}/tag/{id_tag}")
+	@Path("/videogames/{id_videogame}/tags/{name}")
 	public Response addTag(@PathParam("id_videogame") int id_videogame,
-			@PathParam("id_tag") int id_genre,
+			@PathParam("name") String name,
 			@Context HttpRequest request)
 	{
 		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame);
-		Tag tag = ProductDatabase.findTagByID(id_genre);
+		Tag tag = ProductDatabase.findTagByName(name);
+		if(tag == null)
+		{
+			System.out.println("TAG new ");
+			tag = new Tag();
+			tag.setName(name);
+			ProductDatabase.insertTag(tag);
+			tag = ProductDatabase.findTagByName(name);
+		}
+		
 		Response response;
 
-		if(videogame != null && tag !=null  && !videogame.getGenres().contains(tag))
+		boolean flag = false;
+		for(Tag t : videogame.getTags())
+		{
+			if(t.getName().equals(name))
+			{
+				flag = true;
+			}
+		}
+		
+		if(videogame != null && tag !=null  && !flag)
 		{
 			videogame.getTags().add(tag);
 			ProductDatabase.insertVideoGame(videogame);
@@ -509,8 +528,7 @@ public class ProductService
 		}
 		else
 		{
-			System.err.println(" post publisher 500 ");
-			return Response.ok().status(500).build();
+			return new ServerResponse("FORBIDDEN USER", 403, new Headers<Object>());
 		}
 	}
 
@@ -544,7 +562,7 @@ public class ProductService
 		}
 		else
 		{
-			return Response.ok().status(404).build();
+			return new ServerResponse("FORBIDDEN USER", 404, new Headers<Object>());
 		}
 	}
 
@@ -574,7 +592,7 @@ public class ProductService
 		}
 		else
 		{
-			return Response.ok().status(500).build();
+			return new ServerResponse("FORBIDDEN USER", 403, new Headers<Object>());
 		}
 	}
 
@@ -602,7 +620,7 @@ public class ProductService
 		}
 		else
 		{
-			return Response.ok().status(404).build();
+			return new ServerResponse("FORBIDDEN USER", 404, new Headers<Object>());
 		}
 	}
 
@@ -632,7 +650,7 @@ public class ProductService
 		}
 		else
 		{
-			return Response.ok().status(500).build();
+			return new ServerResponse("FORBIDDEN USER", 403, new Headers<Object>());
 		}
 	}
 
@@ -662,7 +680,7 @@ public class ProductService
 		}
 		else
 		{
-			return Response.ok().status(404).build();
+			return new ServerResponse("FORBIDDEN USER", 404, new Headers<Object>());
 		}
 	}
 
@@ -855,7 +873,7 @@ public class ProductService
 		}
 		else
 		{
-			return Response.ok().status(500).build();
+			return new ServerResponse("FORBIDDEN USER", 403, new Headers<Object>());
 		}
 	}
 
@@ -888,7 +906,7 @@ public class ProductService
 		}
 		else
 		{
-			return Response.ok().status(500).build();
+			return new ServerResponse("FORBIDDEN USER", 403, new Headers<Object>());
 		}
 	}
 

@@ -26,6 +26,7 @@
 		<mapping class="publisher.Publisher" />
 		<mapping class="picture.Picture" />
 		<mapping class="product.Product" />
+	
 		<mapping class="console.Console" />
 		<mapping class="command.LineCommand" />
 		<mapping class="command.Command" />

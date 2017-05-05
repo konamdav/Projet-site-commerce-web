@@ -88,7 +88,7 @@ public class Command extends DataBaseEntity{
 			this.linecommands.add(line);	
 		}
 		
-		line.setProduct(product);
+		line.setId_product(product.getId());
 		line.setPrice(product.getPrice());
 		line.setQuantity(line.getQuantity() + quantity);
 		line.setId_command(this.id);
@@ -103,7 +103,7 @@ public class Command extends DataBaseEntity{
 		
 		for(LineCommand lc : this.linecommands)
 		{
-			if(lc.getProduct().getId()== product.getId())
+			if(lc.getId_product()== product.getId())
 			{
 				lineCommand = lc;
 			}
@@ -117,7 +117,7 @@ public class Command extends DataBaseEntity{
 		LineCommand tmp = null;
 		for(LineCommand lc : this.linecommands)
 		{
-			if(lc.getProduct().getId() == linecommand.getProduct().getId())
+			if(lc.getId_product() == linecommand.getId_product())
 			{
 				tmp = lc;
 			}

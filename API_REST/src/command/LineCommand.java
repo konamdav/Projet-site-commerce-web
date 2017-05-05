@@ -6,6 +6,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import generic.DataBaseEntity;
 import product.Product;
 
@@ -16,9 +18,7 @@ public class LineCommand extends DataBaseEntity{
 	private int id_command;
 	
 	@Id
-	@OneToOne
-	@JoinColumn(name="id_product",referencedColumnName="id")
-	private Product product;
+	private int id_product;
 	
 	@Column
 	private int quantity = 0;
@@ -38,6 +38,7 @@ public class LineCommand extends DataBaseEntity{
 		this.price = price;
 	}
 
+	@JsonIgnore
 	public int getId_command() {
 		return id_command;
 	}
@@ -46,13 +47,12 @@ public class LineCommand extends DataBaseEntity{
 		this.id_command = id_command;
 	}
 
-	
-	public Product getProduct() {
-		return product;
+	public int getId_product() {
+		return id_product;
 	}
 
-	public void setProduct(Product product) {
-		this.product = product;
+	public void setId_product(int id_product) {
+		this.id_product = id_product;
 	}
 
 	public int getQuantity() {

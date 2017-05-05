@@ -4,16 +4,19 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import generic.DataBaseEntity;
 import generic.Functions;
 
 @Entity
 public class Tag extends DataBaseEntity{
 	@Id
-	private int id;
+	private int id = (int) (Math.random()*1000);
 	@Column
 	private String name;
 	
+	@JsonIgnore
 	public int getId() {
 		return id;
 	}

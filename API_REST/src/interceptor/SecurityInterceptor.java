@@ -52,35 +52,35 @@ public class SecurityInterceptor implements PreProcessInterceptor
 	@Override
 	public ServerResponse preProcess(HttpRequest request, ResourceMethodInvoker methodInvoked)
 			throws Failure, WebApplicationException {
-
+		request.setAttribute("INTERCEPTOR-ID-USER", null);
 		Method method = methodInvoked.getMethod();
 
-		
+
 		if(method.isAnnotationPresent(PermitAll.class))
 		{
 			return null;
 		}
-		
+
 		if(method.isAnnotationPresent(DenyAll.class))
 		{
 			return ACCESS_FORBIDDEN;
 		}
 
-		
+
 		final HttpHeaders headers = request.getHttpHeaders();
-		
-		
-		
-		
+
+
+
+
 		final List<String> authorization = headers.getRequestHeader(AUTHORIZATION_PROPERTY);
 
-		
+
 		if(authorization == null || authorization.isEmpty())
 		{
 			return ACCESS_DENIED;
 		}
 
-		
+
 		final String encodedUserPassword = authorization.get(0).replaceFirst(AUTHENTICATION_SCHEME + " ", "");
 
 		String usernameAndPassword;
@@ -90,7 +90,7 @@ public class SecurityInterceptor implements PreProcessInterceptor
 			return SERVER_ERROR;
 		}
 
-		
+
 		final StringTokenizer tokenizer = new StringTokenizer(usernameAndPassword, ":");
 		final String username = tokenizer.nextToken();
 		final String password = tokenizer.nextToken();
@@ -100,13 +100,13 @@ public class SecurityInterceptor implements PreProcessInterceptor
 		System.out.println(password);
 
 
-		
+
 		if(method.isAnnotationPresent(RolesAllowed.class))
 		{
 			RolesAllowed rolesAnnotation = method.getAnnotation(RolesAllowed.class);
 			Set<String> rolesSet = new HashSet<String>(Arrays.asList(rolesAnnotation.value()));
 
-			
+
 			if( ! isUserAllowed(username, password, rolesSet, request))
 			{
 				return ACCESS_DENIED;
@@ -126,7 +126,7 @@ public class SecurityInterceptor implements PreProcessInterceptor
 
 		user = UserDatabase.findByCriteria(username, password);
 
-		
+
 
 		if(user!= null && rolesSet.contains(user.getRole()))
 		{

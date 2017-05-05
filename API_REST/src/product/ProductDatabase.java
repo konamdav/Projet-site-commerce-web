@@ -58,10 +58,10 @@ public class ProductDatabase extends Database{
 			if(!rp.console.equals("")) request += "p.console.name = '" + rp.console + "' AND ";
 			if(!rp.publisher.equals("")) request +="p.videogame.publisher.name = '" + rp.publisher + "' AND ";
 			for(int i = 0; i<rp.tags.size() ; i++){
-				if(!rp.tags.get(i).equals("")) request += "(select g from tag.Genre as g where g.name = '" + rp.tags.get(i) + "') in elements(p.videogame.genres) AND ";
+				if(!rp.tags.get(i).equals("")) request += "(select g from tag.Tag as g where g.name = '" + rp.tags.get(i) + "') in elements(p.videogame.tags) AND ";
 			}
 			for(int i = 0; i<rp.pegis.size() ; i++){
-				if(!rp.pegis.get(i).equals("")) request += "(select g from pegi_classification.PegiClassification as g where g.name = '" + rp.pegis.get(i) + "') in elements(p.videogame.PegiClassification) AND ";
+				if(!rp.pegis.get(i).equals("")) request += "(select g from pegi_classification.PegiClassification as g where g.name = '" + rp.pegis.get(i) + "') in elements(p.videogame.classifications) AND ";
 			}
 			for(int i = 0; i<rp.genres.size() ; i++){
 				if(!rp.genres.get(i).equals("")) request += "(select g from genre.Genre as g where g.name = '" + rp.genres.get(i) + "') in elements(p.videogame.genres) AND ";

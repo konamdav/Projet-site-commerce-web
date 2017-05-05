@@ -7,6 +7,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.annotation.security.*;
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import javax.interceptor.Interceptors;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
@@ -49,6 +51,22 @@ import review.Review;
 @Path("/users-service")
 public class UserService
 {
+	public static String encrypt(String strClearText,String strKey) {
+		String strData="";
+		
+		try {
+			SecretKeySpec skeyspec=new SecretKeySpec(strKey.getBytes(),"Blowfish");
+			Cipher cipher=Cipher.getInstance("Blowfish");
+			cipher.init(Cipher.ENCRYPT_MODE, skeyspec);
+			byte[] encrypted=cipher.doFinal(strClearText.getBytes());
+			strData=new String(encrypted);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return strData;
+	}
+	
 	/** get connected user **/
 	@RolesAllowed({"ADMIN", "USER"})
 	@GET
@@ -69,6 +87,31 @@ public class UserService
 		else
 		{
 			response = Response.ok(user.getProperties()).build();
+		}		
+		return response;
+	}
+	
+	
+	/** get  user **/
+	@RolesAllowed({"ADMIN", "USER"})
+	@GET
+	@Path("/user/{id}")
+	public Response getUser(@PathParam("id") int id, @Context HttpServletRequest request)
+	{
+		User user = (User) request.getSession().getAttribute("USER");
+		User userTmp = UserDatabase.findUserByID(id);
+		Response response;
+		if(user == null || userTmp == null)
+		{
+			response = new ServerResponse("USER NOT FOUND", 404, new Headers<Object>());
+		}
+		else if(request.getAttribute("INTERCEPTOR-ID-USER")==null || user.getId() != (int)request.getAttribute("INTERCEPTOR-ID-USER"))
+		{
+			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
+		}
+		else
+		{
+			response = Response.ok(userTmp.getProperties()).build();
 		}		
 		return response;
 	}
@@ -159,6 +202,7 @@ public class UserService
 			}
 			else
 			{
+				System.err.println("ID = "+request.getAttribute("INTERCEPTOR-ID-USER"));
 				Command command = UserDatabase.findCommand(id_command);
 				if(command == null || command.getId_user()!= user.getId())
 				{
@@ -486,13 +530,17 @@ public class UserService
 	{
 		User user = UserDatabase.findByCriteria(username);
 		if(user == null){
+			String s = "";
 			user = new User();
 			user.setFirstname(firstname);
 			user.setMail(mail);
 			user.setRole("USER");
 			user.setSurname(surname);
 			user.setUsername(username);
-			user.setPassword(password);
+			user.setPassword(Base64.encodeBytes(password.getBytes()));
+			
+			System.out.println("PASSWORD CRYPT "+user.getPassword());
+			
 			UserDatabase.saveUser(user);
 
 			return Response.ok(user.getProperties())
@@ -543,7 +591,7 @@ public class UserService
 			{
 				String json ="";
 				user.setUsername(username);
-				user.setPassword(password);
+				//user.setPassword(Base64.encodeBytes(password.getBytes()));
 				user.setFirstname(firstname);
 				user.setSurname(surname);
 				user.setMail(mail);
