@@ -18,7 +18,9 @@ public class LineCommand extends DataBaseEntity{
 	private int id_command;
 	
 	@Id
-	private int id_product;
+	@OneToOne
+	@JoinColumn(name="id_product",referencedColumnName="id")
+	private Product product;
 	
 	@Column
 	private int quantity = 0;
@@ -47,12 +49,14 @@ public class LineCommand extends DataBaseEntity{
 		this.id_command = id_command;
 	}
 
-	public int getId_product() {
-		return id_product;
+
+
+	public Product getProduct() {
+		return product;
 	}
 
-	public void setId_product(int id_product) {
-		this.id_product = id_product;
+	public void setProduct(Product product) {
+		this.product = product;
 	}
 
 	public int getQuantity() {

@@ -8,11 +8,18 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
+import org.hibernate.Session;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import generic.DataBaseEntity;
+import generic.Database;
 import product.Product;
+import product.ProductDatabase;
 import user.User;
+import user.UserDatabase;
 
 @Entity
 public class Review extends DataBaseEntity{
@@ -54,7 +61,21 @@ public class Review extends DataBaseEntity{
 		this.note = note;
 	}
 
-	
+	public String getUser()
+	{
+		Session s = Database.init();
+		User userTmp = UserDatabase.findUserByID(this.id_user,s );
+		Database.close(s);
+		JSONObject object = new JSONObject();
+		try {
+			object.put("id", userTmp.getId());
+			object.put("username", userTmp.getUsername());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return object.toString();
+		
+	}
 	
 	public int getId_product() {
 		return id_product;
@@ -64,7 +85,13 @@ public class Review extends DataBaseEntity{
 		this.id_product = id_product;
 	}
 
-
+	public String getProductName()
+	{
+		Session s = Database.init();
+		Product p = ProductDatabase.findProductByID(id_product, s);
+		Database.close(s);
+		return p.getVideogame().getName()+"/"+p.getConsole().getName();
+	}
 
 	public int getId_user() {
 		return id_user;

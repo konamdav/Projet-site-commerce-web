@@ -43,7 +43,7 @@ public class Product extends DataBaseEntity{
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id_product")
 	private List<Picture> pictures = new ArrayList<Picture>();
 	
-	@OneToMany(mappedBy = "id_product")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id_product")
 	private List<Review> reviews  = new ArrayList<Review>();
 	
 	public List<Review> getReviews() {
@@ -111,5 +111,17 @@ public class Product extends DataBaseEntity{
 		this.pictures = pictures;
 	}
 	
+	
+	public int getNote()
+	{
+		int i = 0;
+		for(Review r : this.getReviews())
+		{
+			i+= r.getNote();
+		}
+		
+		i/=Math.max(this.reviews.size(), 1);
+		return i;
+	}
 	
 }

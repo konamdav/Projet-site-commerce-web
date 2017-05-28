@@ -78,6 +78,18 @@ public class Command extends DataBaseEntity{
 		}
 		return d;
 	}
+	
+	public double getCount()
+	{
+		double d = 0;
+		if(this.linecommands != null){
+			for(LineCommand lc : this.linecommands)
+			{
+				d+= lc.getQuantity();
+			}
+		}
+		return d;
+	}
 
 	public LineCommand addLineCommand(Product product, int quantity)
 	{
@@ -88,7 +100,7 @@ public class Command extends DataBaseEntity{
 			this.linecommands.add(line);	
 		}
 		
-		line.setId_product(product.getId());
+		line.setProduct(product);
 		line.setPrice(product.getPrice());
 		line.setQuantity(line.getQuantity() + quantity);
 		line.setId_command(this.id);
@@ -103,7 +115,7 @@ public class Command extends DataBaseEntity{
 		
 		for(LineCommand lc : this.linecommands)
 		{
-			if(lc.getId_product()== product.getId())
+			if(lc.getProduct().getId()== product.getId())
 			{
 				lineCommand = lc;
 			}
@@ -117,7 +129,7 @@ public class Command extends DataBaseEntity{
 		LineCommand tmp = null;
 		for(LineCommand lc : this.linecommands)
 		{
-			if(lc.getId_product() == linecommand.getId_product())
+			if(lc.getProduct().getId() == linecommand.getProduct().getId())
 			{
 				tmp = lc;
 			}

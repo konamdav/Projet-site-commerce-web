@@ -40,10 +40,10 @@ public class User extends DataBaseEntity implements Serializable {
 	@Column
 	private String role;
 
-	@OneToMany(mappedBy = "id_user")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id_user")
 	private List<Review> reviews;
 	
-	@OneToMany(mappedBy = "id_user", cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id_user", cascade = CascadeType.ALL)
 	private List<Command> commands;
 	
 	@JsonIgnore

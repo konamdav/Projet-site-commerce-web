@@ -14,10 +14,10 @@ import command.LineCommand;
 import generic.Database;
 import product.Product;
 
-public class UserDatabase extends Database{
-	private static Session session  = Database.session;
+public class UserDatabase {
 
-	public static User findUserByID(int id)
+
+	public static User findUserByID(int id, Session session)
 	{
 		session.beginTransaction();
 		User usr = (User) session.get(User.class,id);
@@ -26,7 +26,7 @@ public class UserDatabase extends Database{
 
 	}
 
-	public static User findByCriteria(String username, String password)
+	public static User findByCriteria(String username, String password, Session session)
 	{
 
 		User resUser = (User) session.createCriteria(User.class)
@@ -37,7 +37,7 @@ public class UserDatabase extends Database{
 		return resUser;
 	}
 
-	public static User findByCriteria(String username)
+	public static User findByCriteria(String username, Session session)
 	{
 
 		User resUser = (User) session.createCriteria(User.class)
@@ -46,7 +46,7 @@ public class UserDatabase extends Database{
 		return resUser;
 	}
 
-	public static List findCommands(int id_user)
+	public static List findCommands(int id_user, Session session)
 	{
 
 		return session.createCriteria(Command.class)
@@ -54,7 +54,7 @@ public class UserDatabase extends Database{
 				.list();		
 	}
 
-	public static void saveUser(User user)
+	public static void saveUser(User user, Session session)
 	{
 		session.beginTransaction();
 
@@ -62,21 +62,21 @@ public class UserDatabase extends Database{
 		session.getTransaction().commit();
 	}
 
-	public static void saveCommand(Command command)
+	public static void saveCommand(Command command, Session session)
 	{
 		session.beginTransaction();
 		session.save(command);
 		session.getTransaction().commit();
 	}
 
-	public static void saveLineCommand(LineCommand lineCommand)
+	public static void saveLineCommand(LineCommand lineCommand, Session session)
 	{
 		session.beginTransaction();
 		session.save(lineCommand);
 		session.getTransaction().commit();
 	}
 
-	public static Command findCommand(int id_command) {
+	public static Command findCommand(int id_command, Session session) {
 
 		session.beginTransaction();
 		Command cmd = (Command) session.get(Command.class,id_command);
@@ -84,7 +84,7 @@ public class UserDatabase extends Database{
 		return cmd;
 	}
 
-	public static Command findLastCommand(int id_user) {
+	public static Command findLastCommand(int id_user, Session session) {
 
 		return (Command) session.createCriteria(Command.class)
 				.addOrder(Order.desc("id"))
@@ -93,7 +93,7 @@ public class UserDatabase extends Database{
 				.uniqueResult();		
 	}
 
-	public static LineCommand findLineCommand(int id_linecommand) {
+	public static LineCommand findLineCommand(int id_linecommand, Session session) {
 
 		session.beginTransaction();
 		LineCommand linecmd = (LineCommand) session.get(LineCommand.class,id_linecommand);

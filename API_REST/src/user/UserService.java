@@ -3,6 +3,7 @@ package user;
 
 
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -10,7 +11,9 @@ import javax.annotation.security.*;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.interceptor.Interceptors;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -19,10 +22,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.hibernate.Session;
 import org.jboss.resteasy.core.Headers;
 import org.jboss.resteasy.core.ServerResponse;
 import org.jboss.resteasy.spi.HttpRequest;
@@ -37,10 +42,10 @@ import com.oracle.jrockit.jfr.RequestDelegate;
 
 import command.Command;
 import command.LineCommand;
+import generic.Database;
 import generic.Functions;
 import product.Product;
 import product.ProductDatabase;
-import review.Review;
 
 
 /***
@@ -51,22 +56,7 @@ import review.Review;
 @Path("/users-service")
 public class UserService
 {
-	public static String encrypt(String strClearText,String strKey) {
-		String strData="";
-		
-		try {
-			SecretKeySpec skeyspec=new SecretKeySpec(strKey.getBytes(),"Blowfish");
-			Cipher cipher=Cipher.getInstance("Blowfish");
-			cipher.init(Cipher.ENCRYPT_MODE, skeyspec);
-			byte[] encrypted=cipher.doFinal(strClearText.getBytes());
-			strData=new String(encrypted);
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return strData;
-	}
-	
+
 	/** get connected user **/
 	@RolesAllowed({"ADMIN", "USER"})
 	@GET
@@ -90,29 +80,35 @@ public class UserService
 		}		
 		return response;
 	}
-	
-	
+
+
 	/** get  user **/
-	@RolesAllowed({"ADMIN", "USER"})
 	@GET
+	@PermitAll
 	@Path("/user/{id}")
 	public Response getUser(@PathParam("id") int id, @Context HttpServletRequest request)
 	{
-		User user = (User) request.getSession().getAttribute("USER");
-		User userTmp = UserDatabase.findUserByID(id);
+		Session session = Database.init();
+		User userTmp = UserDatabase.findUserByID(id, session);
 		Response response;
-		if(user == null || userTmp == null)
+		if(userTmp == null)
 		{
 			response = new ServerResponse("USER NOT FOUND", 404, new Headers<Object>());
 		}
-		else if(request.getAttribute("INTERCEPTOR-ID-USER")==null || user.getId() != (int)request.getAttribute("INTERCEPTOR-ID-USER"))
-		{
-			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
-		}
 		else
 		{
-			response = Response.ok(userTmp.getProperties()).build();
+			JSONObject object = new JSONObject();
+			try {
+				object.put("id", userTmp.getId());
+				object.put("username", userTmp.getUsername());
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+
+			response = Response.ok(object.toString()).build();
 		}		
+		
+		Database.close(session);
 		return response;
 	}
 
@@ -121,29 +117,39 @@ public class UserService
 	 * @param username
 	 * @param password
 	 * @param request
+	 * @return 
 	 * @return
 	 */
 	@PermitAll
 	@PUT
 	@Path("/connect/{username}/{password}")
-	public Response connectUser(@PathParam("username") String username, @PathParam("password") String password, @Context HttpServletRequest  request)
+	public Response connectUser(@PathParam("username") String username, @PathParam("password") String password, 
+			@Context HttpServletRequest  request)
 	{
-		User user = UserDatabase.findByCriteria(username, password);
-		Response  response;
+		Session session = Database.init();
+		Response response;
+
+		System.out.println("CONNECT "+username+" "+password);
+
+		User user = UserDatabase.findByCriteria(username, password, session);
 		if(user == null)
 		{
 			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
 		}
 		else
 		{
+			System.out.println("CONNECTED");
 			request.getSession().setAttribute("USER", user);
-			response = Response.ok(user.getProperties()).build();
+			response = Response.ok(user.getProperties()).build();			
 		}
 
+
+		Database.close(session);
 		return response;
+
 	}
-	
-	
+
+
 	/**
 	 * Disconnect user
 	 * @param request
@@ -154,12 +160,13 @@ public class UserService
 	@Path("/disconnect")
 	public Response disconnectUser(@Context HttpServletRequest  request)
 	{
+		
 		System.out.println("disconnect");
 		User user = (User) request.getSession().getAttribute("USER");
 		Response response = null;
 		if(user == null)
 		{
-			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
+			response = Response.ok("SUCCESS").build();
 		}
 		else 
 		{
@@ -169,11 +176,13 @@ public class UserService
 			}
 			else
 			{
+				System.out.println("disconnected !!!");
 				request.getSession().removeAttribute("USER");
 				request.getSession().invalidate();
 				response = Response.ok("SUCCESS").build();
 			}
 		}
+
 		return response;
 	}
 
@@ -188,6 +197,7 @@ public class UserService
 	@Path("/user/commands/{id_command}")
 	public Response getCommandById(@PathParam("id_command") int id_command, @Context HttpServletRequest request)
 	{
+		Session session = Database.init();
 		User user = (User) request.getSession().getAttribute("USER");
 		Response response;
 		if(user == null)
@@ -203,7 +213,7 @@ public class UserService
 			else
 			{
 				System.err.println("ID = "+request.getAttribute("INTERCEPTOR-ID-USER"));
-				Command command = UserDatabase.findCommand(id_command);
+				Command command = UserDatabase.findCommand(id_command, session);
 				if(command == null || command.getId_user()!= user.getId())
 				{
 					response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
@@ -213,6 +223,7 @@ public class UserService
 				}	
 			}
 		}
+		Database.close(session);
 		return response;
 	}
 
@@ -227,6 +238,7 @@ public class UserService
 	@Path("/user/panier")
 	public Response getPanier(@Context HttpServletRequest request)
 	{
+		
 		Response response;
 		Command command = Functions.getPanier(request);
 		if(command == null)
@@ -235,6 +247,30 @@ public class UserService
 		}
 		else {
 			response = Response.ok(command.getProperties()).build();
+		}	
+		return response;
+	}
+
+
+
+	/**
+	 * Get user panier
+	 * @param request
+	 * @return
+	 */
+	@PermitAll
+	@GET
+	@Path("/user/panier/nb")
+	public Response getPaniernb(@Context HttpServletRequest request)
+	{
+		Response response;
+		Command command = Functions.getPanier(request);
+		if(command == null)
+		{
+			response  = new ServerResponse("00", 404, new Headers<Object>());
+		}
+		else {
+			response = Response.ok(command.getCount()).build();
 		}	
 		return response;
 	}
@@ -251,6 +287,7 @@ public class UserService
 	public Response getCommands(@Context HttpServletRequest request) throws JSONException
 	{
 		User user = (User) request.getSession().getAttribute("USER");
+		Session session = Database.init();
 		Response response ;
 		if(user == null)
 		{
@@ -268,7 +305,8 @@ public class UserService
 				mapper.enable(SerializationFeature.INDENT_OUTPUT);
 				String json = "[]";
 				try {
-					json = mapper.writeValueAsString(user.getCommands());
+					User u = UserDatabase.findUserByID(user.getId(), session);
+					json = mapper.writeValueAsString(u.getCommands());
 				} catch (JsonProcessingException e) {
 					e.printStackTrace();
 				}
@@ -276,6 +314,8 @@ public class UserService
 				response = Response.ok(json).build();
 			}	
 		}
+		
+		Database.close(session);
 		return response;
 	}
 
@@ -290,6 +330,7 @@ public class UserService
 	@Path("user/panier/pay")
 	public Response validateCommand(@Context HttpServletRequest request) throws JSONException
 	{
+		Session session = Database.init();
 		User user = (User) request.getSession().getAttribute("USER");
 
 		Response  response;
@@ -315,23 +356,25 @@ public class UserService
 				{
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					command.setDate_command(sdf.format(new Date()));
-					UserDatabase.saveCommand(command);	
-					
-					Command newCommand = UserDatabase.findLastCommand(user.getId());
-					
+					UserDatabase.saveCommand(command, session);	
+
+					Command newCommand = UserDatabase.findLastCommand(user.getId(), session);
+
 					for (LineCommand lc : command.getLinecommands())
 					{
 						lc.setId_command(newCommand.getId());
-						UserDatabase.saveLineCommand(lc);
+						UserDatabase.saveLineCommand(lc, session);
 					}
-					
+
 					Functions.newPanier(request);
-					
+
 					String json = command.getProperties();
 					response = Response.ok(json).build();
 				}
 			}	
 		}
+		
+		Database.close(session);
 		return response;
 	}
 
@@ -343,48 +386,37 @@ public class UserService
 	 * @return
 	 * @throws JSONException
 	 */
-	@RolesAllowed({"ADMIN", "USER"})
+	@PermitAll
 	@DELETE
 	@Path("user/panier/{id_product}")
 	public Response deleteProductToCommand(	@PathParam("id_product") int id_product,
 			@Context HttpServletRequest request) throws JSONException
 	{
-		User user = (User) request.getSession().getAttribute("USER");
+		Session session = Database.init();
 		Response response;
-		if(user == null)
-		{
-			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
+
+		Command command = Functions.getPanier(request);
+		Product product = ProductDatabase.findProductByID(id_product, session);
+		if(command == null || product == null){
+			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 		}
-		else 
-		{
-			if(request.getAttribute("INTERCEPTOR-ID-USER")==null || user.getId() != (int)request.getAttribute("INTERCEPTOR-ID-USER"))
+		else
+		{	
+			LineCommand  linecmd = command.findLineCommand(product);
+			if(linecmd == null)
 			{
 				response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 			}
 			else
 			{
-				Command command = Functions.getPanier(request);
-				Product product = ProductDatabase.findProductByID(id_product);
-				if(command == null || product == null){
-					response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
-				}
-				else
-				{	
-					LineCommand  linecmd = command.findLineCommand(product);
-					if(linecmd == null)
-					{
-						response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
-					}
-					else
-					{
-						LineCommand line = command.removeLineCommand(linecmd);
-						String json = line.getProperties();
-						response = Response.ok(json).build();
-					}
+				LineCommand line = command.removeLineCommand(linecmd);
+				String json = line.getProperties();
+				response = Response.ok(json).build();
+			}
 
-				}
-			}	
 		}
+
+		Database.close(session);
 		return response;
 	}
 
@@ -402,7 +434,7 @@ public class UserService
 	public Response addProductToCommand(@PathParam("id_product") int id_product, @PathParam("qt") int qt,
 			@Context HttpServletRequest request) throws JSONException
 	{
-
+		Session session = Database.init();
 		Response response;
 		Command command = Functions.getPanier(request);
 		if(command == null)
@@ -411,7 +443,7 @@ public class UserService
 		}
 		else
 		{	
-			Product  product = ProductDatabase.findProductByID(id_product);
+			Product  product = ProductDatabase.findProductByID(id_product, session);
 			if(product == null)
 			{
 				response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
@@ -421,21 +453,24 @@ public class UserService
 				LineCommand line = command.addLineCommand(product, qt);
 				String json = line.getProperties();
 				response = Response.ok(json).build();
+
+				System.out.println("add product "+line.getQuantity());
 			}
 		}
-
+		
+		Database.close(session);
 		return response;
 	}
 
 
-/**
- * New line commmand
- * @param id_product
- * @param qt
- * @param request
- * @return
- * @throws JSONException
- */
+	/**
+	 * New line commmand
+	 * @param id_product
+	 * @param qt
+	 * @param request
+	 * @return
+	 * @throws JSONException
+	 */
 	@PermitAll
 	@PUT
 	@Path("user/panier/{id_product}/{qt}")
@@ -443,11 +478,12 @@ public class UserService
 			@Context HttpServletRequest request) throws JSONException
 	{
 
-
+		System.out.println("UPDATE PANIER");
+		Session session = Database.init();
 		Response response;
 
 		Command command = Functions.getPanier(request);
-		Product product = ProductDatabase.findProductByID(id_product);
+		Product product = ProductDatabase.findProductByID(id_product, session);
 		if(product == null || command == null)
 		{
 			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
@@ -461,11 +497,15 @@ public class UserService
 			}
 			else
 			{
+				System.out.println("UDPATED "+qt);
 				line.setQuantity(qt);
 				String json = line.getProperties();
 				response = Response.ok(json).build();
-			}			
+			}	
+			
 		}
+		
+		Database.close(session);
 		return response;
 	}
 
@@ -479,6 +519,7 @@ public class UserService
 	@Path("/user/reviews")
 	public Response getReviews(@Context HttpServletRequest request)
 	{
+		Session session = Database.init();
 		User user = (User) request.getSession().getAttribute("USER");
 		Response response;
 		if(user == null)
@@ -497,7 +538,8 @@ public class UserService
 				mapper.enable(SerializationFeature.INDENT_OUTPUT);
 				String json = "[]";
 				try {
-					json = mapper.writeValueAsString(user.getReviews());
+					User u = UserDatabase.findUserByID(user.getId(), session);
+					json = mapper.writeValueAsString(u.getReviews());
 				} catch (JsonProcessingException e) {
 					e.printStackTrace();
 				}
@@ -505,10 +547,12 @@ public class UserService
 				response = Response.ok(json).build();
 			}	
 		}
+		
+		Database.close(session);
 		return response;
 	}
-	
-	
+
+
 
 
 	/**
@@ -528,9 +572,12 @@ public class UserService
 			@PathParam("mail") String mail
 			)
 	{
-		User user = UserDatabase.findByCriteria(username);
+		
+		Session session = Database.init();
+		System.out.println("POST NEW USER \n---------------");
+		User user = UserDatabase.findByCriteria(username, session);
 		if(user == null){
-			String s = "";
+
 			user = new User();
 			user.setFirstname(firstname);
 			user.setMail(mail);
@@ -538,22 +585,24 @@ public class UserService
 			user.setSurname(surname);
 			user.setUsername(username);
 			user.setPassword(Base64.encodeBytes(password.getBytes()));
-			
-			System.out.println("PASSWORD CRYPT "+user.getPassword());
-			
-			UserDatabase.saveUser(user);
 
+			System.out.println("PASSWORD CRYPT "+user.getPassword());
+
+			UserDatabase.saveUser(user, session);
+
+			Database.close(session);
 			return Response.ok(user.getProperties())
 					.status(200)
 					.build();
 		}
 		else
 		{
-			return Response.ok().status(500).build();
+			Database.close(session);
+			return Response.ok().status(403).build();
 		}
 	}
 
-	
+
 	/**
 	 * Update user
 	 * @param username
@@ -564,7 +613,7 @@ public class UserService
 	 * @param request
 	 * @return
 	 */
-	
+
 	@RolesAllowed({"ADMIN", "USER"})
 	@PUT
 	@Path("/user/{username}/{password}/{firstname}/{surname}/{mail}")
@@ -573,9 +622,9 @@ public class UserService
 			@PathParam("mail") String mail, @Context HttpServletRequest request
 			)
 	{
-		
-		User user = (User) request.getSession().getAttribute("USER");	
 
+		User user = (User) request.getSession().getAttribute("USER");	
+		Session session = Database.init();
 		Response response;
 		if(user == null)
 		{
@@ -596,12 +645,14 @@ public class UserService
 				user.setSurname(surname);
 				user.setMail(mail);
 
-				UserDatabase.saveUser(user);
+				UserDatabase.saveUser(user, session);
 				json = user.getProperties();
 
 				response = Response.ok(json).build();
 			}	
 		}
+		
+		Database.close(session);
 		return response;
 	}
 
@@ -618,7 +669,8 @@ public class UserService
 	@Path("/user/role/{id}/{role}")
 	public Response updateRoleUser(@PathParam("id") int id, @PathParam("role") String role, @Context HttpRequest request)
 	{
-		User user = UserDatabase.findUserByID(id);
+		Session session = Database.init();
+		User user = UserDatabase.findUserByID(id, session);
 		Response response;
 		if(user == null)
 		{
@@ -636,12 +688,14 @@ public class UserService
 			}
 
 			String json ="";
-			UserDatabase.saveUser(user);
+			UserDatabase.saveUser(user, session);
 			json = user.getProperties();
 
 			response = Response.ok(json).build();
 
 		}
+		
+		Database.close(session);
 		return response;
 	}
 }

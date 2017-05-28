@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.UUID;
 
 import javax.annotation.security.*;
 import javax.interceptor.Interceptors;
@@ -22,6 +23,7 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.hibernate.Session;
 import org.jboss.resteasy.core.Headers;
 import org.jboss.resteasy.core.ServerResponse;
 import org.jboss.resteasy.spi.HttpRequest;
@@ -33,6 +35,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.oracle.jrockit.jfr.RequestDelegate;
 
 import console.Console;
+import generic.Database;
 import genre.Genre;
 import pegi_classification.PegiClassification;
 import picture.Picture;
@@ -62,7 +65,8 @@ public class ProductService
 	@Path("/products/{id}")
 	public Response getProductById(@PathParam("id") int id, @Context HttpRequest request)
 	{
-		Product product = ProductDatabase.findProductByID(id);
+		Session session = Database.init();
+		Product product = ProductDatabase.findProductByID(id, session);
 
 		Response response;
 		if(product == null)
@@ -73,6 +77,88 @@ public class ProductService
 		{
 			response = Response.ok(product.getProperties()).build();
 		}		
+		Database.close(session);
+		return response;
+	}
+	
+	@PermitAll
+	@GET
+	@Path("/videogames/{id}")
+	public Response getvgById(@PathParam("id") int id, @Context HttpRequest request)
+	{
+		Session session = Database.init();
+		VideoGame videogame = ProductDatabase.findVideoGameByID(id, session);
+
+		Response response;
+		if(videogame == null)
+		{
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
+		}
+		else
+		{
+			response = Response.ok(videogame.getProperties()).build();
+		}		
+		Database.close(session);
+		return response;
+	}
+
+	@PermitAll
+	@GET
+	@Path("/products/discovery")
+	public Response getDiscovery( @Context HttpRequest request)
+	{
+		Session session = Database.init();
+		List list = ProductDatabase.RandomProducts(session);
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		String json = "[]";
+		try {
+			json = mapper.writeValueAsString(list);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+
+		Response response;
+		if(json.isEmpty())
+		{
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
+		}
+		else
+		{
+			response = Response.ok(json).status(200).build();
+		}		
+		
+		Database.close(session);
+		return response;
+	}
+	
+	@PermitAll
+	@GET
+	@Path("/products/best")
+	public Response getBest( @Context HttpRequest request)
+	{
+		Session session = Database.init();
+		List list = ProductDatabase.BestProducts(session);
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		String json = "[]";
+		try {			
+			json = mapper.writeValueAsString(list);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+
+		Response response;
+		if(json.isEmpty())
+		{
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
+		}
+		else
+		{
+			response = Response.ok(json).status(200).build();
+		}		
+		
+		Database.close(session);
 		return response;
 	}
 
@@ -86,7 +172,8 @@ public class ProductService
 	@Path("/products")
 	public Response getProducts(@Context HttpRequest request)
 	{
-		List list = ProductDatabase.findAllProducts();
+		Session session = Database.init();
+		List list = ProductDatabase.findAllProducts(session);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		String json = "[]";
@@ -105,6 +192,8 @@ public class ProductService
 		{
 			response = Response.ok(json).status(200).build();
 		}		
+		
+		Database.close(session);
 		return response;
 	}
 
@@ -116,7 +205,8 @@ public class ProductService
 	@Path("/videogames")
 	public Response getVideoGames(@Context HttpRequest request)
 	{
-		List list = ProductDatabase.findAllVideoGames();
+		Session session = Database.init();
+		List list = ProductDatabase.findAllVideoGames(session);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		String json = "[]";
@@ -134,7 +224,9 @@ public class ProductService
 		else
 		{
 			response = Response.ok(json).status(200).build();
-		}		
+		}	
+		
+		Database.close(session);
 		return response;
 	}
 
@@ -143,7 +235,8 @@ public class ProductService
 	@Path("/publishers")
 	public Response getPublishers(@Context HttpRequest request)
 	{
-		List list = ProductDatabase.findAllPublishers();
+		Session session = Database.init();
+		List list = ProductDatabase.findAllPublishers(session);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		String json = "[]";
@@ -161,7 +254,9 @@ public class ProductService
 		else
 		{
 			response = Response.ok(json).status(200).build();
-		}		
+		}
+		
+		Database.close(session);
 		return response;
 	}
 
@@ -171,7 +266,99 @@ public class ProductService
 	@Path("/consoles")
 	public Response getConsoles(@Context HttpRequest request)
 	{
-		List list = ProductDatabase.findAllConsoles();
+		Session session = Database.init();
+		List list = ProductDatabase.findAllConsoles(session);
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		String json = "[]";
+		try {
+			json = mapper.writeValueAsString(list);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+
+		Response response;
+		if(json.isEmpty())
+		{
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
+		}
+		else
+		{
+			response = Response.ok(json).status(200).build();
+		}
+		
+		Database.close(session);
+		return response;
+	}
+	
+	@PermitAll
+	@GET
+	@Path("/tags")
+	public Response getTags(@Context HttpRequest request)
+	{
+		Session session = Database.init();
+		List list = ProductDatabase.findAllTags(session);
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		String json = "[]";
+		try {
+			json = mapper.writeValueAsString(list);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+
+		Response response;
+		if(json.isEmpty())
+		{
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
+		}
+		else
+		{
+			response = Response.ok(json).status(200).build();
+		}
+		
+		Database.close(session);
+		return response;
+	}
+	
+	@PermitAll
+	@GET
+	@Path("/pegi")
+	public Response getPegi(@Context HttpRequest request)
+	{
+		Session session = Database.init();
+		List list = ProductDatabase.findAllPegi(session);
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		String json = "[]";
+		try {
+			json = mapper.writeValueAsString(list);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+
+		Response response;
+		if(json.isEmpty())
+		{
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
+		}
+		else
+		{
+			response = Response.ok(json).status(200).build();
+		}
+		
+		Database.close(session);
+		return response;
+	}
+
+	
+	@PermitAll
+	@GET
+	@Path("/genres")
+	public Response getGenres(@Context HttpRequest request)
+	{
+		Session session = Database.init();
+		List list = ProductDatabase.findAllGenres(session);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		String json = "[]";
@@ -190,6 +377,8 @@ public class ProductService
 		{
 			response = Response.ok(json).status(200).build();
 		}		
+		
+		Database.close(session);
 		return response;
 	}
 
@@ -212,14 +401,15 @@ public class ProductService
 			@PathParam("date") String date,
 			@Context HttpServletRequest request)
 	{
-		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame);
-		Console console = ProductDatabase.findConsoleByID(id_console);
+		Session session = Database.init();
+		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame, session);
+		Console console = ProductDatabase.findConsoleByID(id_console, session);
 
 		Response response;
 
 		if(request.getSession().getAttribute("USER")!=null && videogame!= null && console!=null)
 		{
-			Product product = ProductDatabase.findProductByKey(videogame, console);			
+			Product product = ProductDatabase.findProductByKey(videogame, console, session);			
 			if(product != null)
 			{
 				response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
@@ -232,7 +422,7 @@ public class ProductService
 				product.setPrice(price);
 				product.setVideogame(videogame);
 
-				ProductDatabase.insertProduct(product);
+				ProductDatabase.insertProduct(product, session);
 				response = Response.ok(product.getProperties()).build();
 			}		
 		}
@@ -240,6 +430,8 @@ public class ProductService
 		{
 			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 		}
+		
+		Database.close(session);
 
 		return response;
 	}
@@ -252,8 +444,9 @@ public class ProductService
 			@PathParam("id_publisher") int id_publisher,
 			@Context HttpRequest request)
 	{
-		VideoGame videogame = ProductDatabase.findVideoGameByName(name);
-		Publisher publisher = ProductDatabase.findPublisherByID(id_publisher);
+		Session session = Database.init();
+		VideoGame videogame = ProductDatabase.findVideoGameByName(name, session);
+		Publisher publisher = ProductDatabase.findPublisherByID(id_publisher, session);
 		Response response;
 
 		if(videogame == null && publisher !=null)
@@ -261,9 +454,9 @@ public class ProductService
 			videogame = new VideoGame();
 			videogame.setName(name);
 			videogame.setPublisher(publisher);
-			ProductDatabase.insertVideoGame(videogame);
+			ProductDatabase.insertVideoGame(videogame, session);
 
-			videogame = ProductDatabase.findVideoGameByName(name);
+			videogame = ProductDatabase.findVideoGameByName(name, session);
 			response = Response.ok(videogame.getProperties()).build();
 
 		}
@@ -272,6 +465,8 @@ public class ProductService
 			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 		}
 
+		Database.close(session);
+		
 		return response;
 	}
 
@@ -283,16 +478,17 @@ public class ProductService
 			@PathParam("id_genre") int id_genre,
 			@Context HttpRequest request)
 	{
-		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame);
-		Genre genre = ProductDatabase.findGenreByID(id_genre);
+		Session session = Database.init();
+		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame,session);
+		Genre genre = ProductDatabase.findGenreByID(id_genre, session);
 		Response response;
 
 		if(videogame != null && genre !=null  && !videogame.getGenres().contains(genre))
 		{
 			videogame.getGenres().add(genre);
-			ProductDatabase.insertVideoGame(videogame);
+			ProductDatabase.insertVideoGame(videogame, session);
 
-			videogame = ProductDatabase.findVideoGameByID(id_videogame);
+			videogame = ProductDatabase.findVideoGameByID(id_videogame, session);
 			response = Response.ok(videogame.getProperties()).build();
 
 		}
@@ -300,7 +496,37 @@ public class ProductService
 		{
 			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 		}
+		Database.close(session);
+		return response;
+	}
 
+
+	@RolesAllowed({"ADMIN"})
+	@DELETE
+	@Path("/videogames/{id_videogame}/genres/{id_genre}")
+	public Response delGenre(@PathParam("id_videogame") int id_videogame,
+			@PathParam("id_genre") int id_genre,
+			@Context HttpRequest request)
+	{
+		Session session = Database.init();
+		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame,session);
+		Genre genre = ProductDatabase.findGenreByID(id_genre, session);
+		Response response;
+
+		if(videogame != null && genre !=null  && videogame.getGenres().contains(genre))
+		{
+			videogame.getGenres().remove(genre);
+			ProductDatabase.insertVideoGame(videogame, session);
+
+			videogame = ProductDatabase.findVideoGameByID(id_videogame, session);
+			response = Response.ok(videogame.getProperties()).build();
+
+		}
+		else
+		{
+			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
+		}
+		Database.close(session);
 		return response;
 	}
 
@@ -312,16 +538,18 @@ public class ProductService
 			@PathParam("id_pegi") int id_pegi,
 			@Context HttpRequest request)
 	{
-		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame);
-		PegiClassification pegi = ProductDatabase.findPegiByID(id_pegi);
+		Session session = Database.init();
+		
+		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame, session);
+		PegiClassification pegi = ProductDatabase.findPegiByID(id_pegi, session);
 		Response response;
 
 		if(videogame != null && pegi !=null  && !videogame.getGenres().contains(pegi))
 		{
 			videogame.getClassifications().add(pegi);
-			ProductDatabase.insertVideoGame(videogame);
+			ProductDatabase.insertVideoGame(videogame, session);
 
-			videogame = ProductDatabase.findVideoGameByID(id_videogame);
+			videogame = ProductDatabase.findVideoGameByID(id_videogame, session);
 			response = Response.ok(videogame.getProperties()).build();
 
 		}
@@ -330,10 +558,44 @@ public class ProductService
 			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 		}
 
+		Database.close(session);
+		return response;
+	}
+
+
+	@RolesAllowed({"ADMIN"})
+	@DELETE
+	@Path("/videogames/{id_videogame}/pegi/{id_pegi}")
+	public Response delPEGI(@PathParam("id_videogame") int id_videogame,
+			@PathParam("id_pegi") int id_pegi,
+			@Context HttpRequest request)
+	{
+		Session session = Database.init();
+		
+		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame, session);
+		PegiClassification pegi = ProductDatabase.findPegiByID(id_pegi, session);
+		Response response;
+
+		if(videogame != null && pegi !=null  && videogame.getGenres().contains(pegi))
+		{
+			videogame.getClassifications().remove(pegi);
+			ProductDatabase.insertVideoGame(videogame, session);
+
+			videogame = ProductDatabase.findVideoGameByID(id_videogame, session);
+			response = Response.ok(videogame.getProperties()).build();
+
+		}
+		else
+		{
+			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
+		}
+
+		Database.close(session);
 		return response;
 	}
 
 	
+
 	@RolesAllowed({"ADMIN"})
 	@POST
 	@Path("/videogames/{id_videogame}/tags/{name}")
@@ -341,17 +603,18 @@ public class ProductService
 			@PathParam("name") String name,
 			@Context HttpRequest request)
 	{
-		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame);
-		Tag tag = ProductDatabase.findTagByName(name);
+		Session session = Database.init();
+		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame, session);
+		Tag tag = ProductDatabase.findTagByName(name, session);
 		if(tag == null)
 		{
 			System.out.println("TAG new ");
 			tag = new Tag();
 			tag.setName(name);
-			ProductDatabase.insertTag(tag);
-			tag = ProductDatabase.findTagByName(name);
+			ProductDatabase.insertTag(tag, session);
+			tag = ProductDatabase.findTagByName(name, session);
 		}
-		
+
 		Response response;
 
 		boolean flag = false;
@@ -362,13 +625,13 @@ public class ProductService
 				flag = true;
 			}
 		}
-		
+
 		if(videogame != null && tag !=null  && !flag)
 		{
 			videogame.getTags().add(tag);
-			ProductDatabase.insertVideoGame(videogame);
+			ProductDatabase.insertVideoGame(videogame, session);
 
-			videogame = ProductDatabase.findVideoGameByID(id_videogame);
+			videogame = ProductDatabase.findVideoGameByID(id_videogame, session);
 			response = Response.ok(videogame.getProperties()).build();
 
 		}
@@ -377,9 +640,41 @@ public class ProductService
 			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 		}
 
+		Database.close(session);
 		return response;
 	}
 	
+	
+	@RolesAllowed({"ADMIN"})
+	@DELETE
+	@Path("/videogames/{id_videogame}/tags/{name}")
+	public Response delTag(@PathParam("id_videogame") int id_videogame,
+			@PathParam("name") String name,
+			@Context HttpRequest request)
+	{
+		Session session = Database.init();
+		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame, session);
+		Tag tag = ProductDatabase.findTagByName(name, session);
+		Response response;
+
+		if(videogame != null && tag !=null  )
+		{
+			videogame.getTags().remove(tag);
+			ProductDatabase.insertVideoGame(videogame, session);
+
+			videogame = ProductDatabase.findVideoGameByID(id_videogame, session);
+			response = Response.ok(videogame.getProperties()).build();
+
+		}
+		else
+		{
+			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
+		}
+
+		Database.close(session);
+		return response;
+	}
+
 	@RolesAllowed({"ADMIN"})
 	@PUT
 	@Path("/videogames/{id_videogame}/{name}/{id_publisher}")
@@ -389,15 +684,16 @@ public class ProductService
 			@PathParam("id_publisher") int id_publisher,
 			@Context HttpRequest request)
 	{
-		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame);
-		Publisher publisher = ProductDatabase.findPublisherByID(id_publisher);
+		Session session = Database.init();
+		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame, session);
+		Publisher publisher = ProductDatabase.findPublisherByID(id_publisher, session);
 		Response response;
 
 		if(videogame != null && publisher !=null)
 		{
 			videogame.setName(name);
 			videogame.setPublisher(publisher);
-			ProductDatabase.insertVideoGame(videogame);
+			ProductDatabase.insertVideoGame(videogame, session);
 
 			response = Response.ok(videogame.getProperties()).build();
 
@@ -406,7 +702,7 @@ public class ProductService
 		{
 			response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
 		}
-
+		Database.close(session);
 		return response;
 	}
 
@@ -430,7 +726,8 @@ public class ProductService
 			@PathParam("date") String date,
 			@Context HttpRequest request)
 	{
-		Product product = ProductDatabase.findProductByID(id_product);
+		Session session = Database.init();
+		Product product = ProductDatabase.findProductByID(id_product, session);
 
 		Response response;
 		if(product == null)
@@ -439,8 +736,8 @@ public class ProductService
 		}
 		else
 		{
-			Console console = ProductDatabase.findConsoleByID(id_console);
-			VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame);
+			Console console = ProductDatabase.findConsoleByID(id_console, session);
+			VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame, session);
 			if(console != null && videogame != null)
 			{
 				product.setConsole(console);
@@ -448,7 +745,7 @@ public class ProductService
 				product.setPrice(price);
 				product.setVideogame(videogame);
 
-				ProductDatabase.insertProduct(product);				
+				ProductDatabase.insertProduct(product, session);				
 				response = Response.ok(product.getProperties()).build();
 			}
 			else
@@ -457,6 +754,7 @@ public class ProductService
 			}
 
 		}		
+		Database.close(session);
 		return response;
 	}
 
@@ -471,6 +769,7 @@ public class ProductService
 	@Path("/products/research")
 	public Response research(@Context HttpServletRequest request) throws IOException
 	{
+		Session session = Database.init();
 		BufferedReader reader = request.getReader();
 		String response = new String();
 		for (String line; (line = reader.readLine()) != null; response += line);
@@ -478,7 +777,7 @@ public class ProductService
 		ResearchedProduct researchedProduct = map.readValue(response, ResearchedProduct.class);
 
 
-		List list =	ProductDatabase.researchProduct(researchedProduct);
+		List list =	ProductDatabase.researchProduct(researchedProduct, session);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		String json = "[]";
@@ -497,6 +796,8 @@ public class ProductService
 		{
 			responseServ = Response.ok(json).status(200).build();
 		}		
+		
+		Database.close(session);
 		return responseServ;
 	}
 
@@ -513,21 +814,23 @@ public class ProductService
 	public Response createPublisher(@PathParam("name") String name, @Context HttpRequest request)
 	{
 		System.err.println(" post publisher ");
-
-		Publisher publisher = ProductDatabase.findPublisherByName(name);
+		Session session = Database.init();
+		Publisher publisher = ProductDatabase.findPublisherByName(name, session);
 		if(publisher == null){
 			publisher = new Publisher();
 			publisher.setName(name);
 
-			ProductDatabase.insertPublisher(publisher);
+			ProductDatabase.insertPublisher(publisher, session);
 
-			publisher = ProductDatabase.findPublisherByName(name);
+			publisher = ProductDatabase.findPublisherByName(name, session);
+			Database.close(session);
 			return Response.ok(publisher.getProperties())
 					.status(200)
 					.build();
 		}
 		else
 		{
+			Database.close(session);
 			return new ServerResponse("FORBIDDEN USER", 403, new Headers<Object>());
 		}
 	}
@@ -548,20 +851,21 @@ public class ProductService
 	public Response updatePublisher(@PathParam("id_publisher") int id_publisher, @PathParam("name") String name, @Context HttpRequest request)
 	{
 		System.err.println(" post publisher ");
-
-		Publisher publisher = ProductDatabase.findPublisherByID(id_publisher);
+		Session session = Database.init();
+		Publisher publisher = ProductDatabase.findPublisherByID(id_publisher, session);
 
 		if(publisher != null){
 
 			publisher.setName(name);
-			ProductDatabase.insertPublisher(publisher);
-
+			ProductDatabase.insertPublisher(publisher, session);
+			Database.close(session);
 			return Response.ok(publisher.getProperties())
 					.status(200)
 					.build();
 		}
 		else
 		{
+			Database.close(session);
 			return new ServerResponse("FORBIDDEN USER", 404, new Headers<Object>());
 		}
 	}
@@ -578,20 +882,23 @@ public class ProductService
 	@Path("/genres/{name}")
 	public Response createGenre(@PathParam("name") String name, @Context HttpRequest request)
 	{
-		Genre genre = ProductDatabase.findGenreByName(name);
+		Session session = Database.init();
+		Genre genre = ProductDatabase.findGenreByName(name, session);
 		if(genre == null){
 			genre = new Genre();
 			genre.setName(name);
 
-			ProductDatabase.insertGenre(genre);
+			ProductDatabase.insertGenre(genre, session);
 
-			genre = ProductDatabase.findGenreByName(name);
+			genre = ProductDatabase.findGenreByName(name, session);
+			Database.close(session);
 			return Response.ok(genre.getProperties())
 					.status(200)
 					.build();
 		}
 		else
 		{
+			Database.close(session);
 			return new ServerResponse("FORBIDDEN USER", 403, new Headers<Object>());
 		}
 	}
@@ -608,18 +915,20 @@ public class ProductService
 	@Path("/genres/{id_genre}/{name}")
 	public Response updateGenre(@PathParam("id_genre") int id_genre, @PathParam("name") String name, @Context HttpRequest request)
 	{
-		Genre genre = ProductDatabase.findGenreByID(id_genre);
+		Session session = Database.init();
+		Genre genre = ProductDatabase.findGenreByID(id_genre, session);
 		if(genre != null){
 
 			genre.setName(name);
-			ProductDatabase.insertGenre(genre);
-
+			ProductDatabase.insertGenre(genre, session);
+			Database.close(session);
 			return Response.ok(genre.getProperties())
 					.status(200)
 					.build();
 		}
 		else
 		{
+			Database.close(session);
 			return new ServerResponse("FORBIDDEN USER", 404, new Headers<Object>());
 		}
 	}
@@ -636,20 +945,23 @@ public class ProductService
 	@Path("/consoles/{name}")
 	public Response createConsole(@PathParam("name") String name, @Context HttpRequest request)
 	{
-		Console console = ProductDatabase.findConsoleByName(name);
+		Session session = Database.init();
+		Console console = ProductDatabase.findConsoleByName(name, session);
 		if(console == null){
 			console = new Console();
 			console.setName(name);
 
-			ProductDatabase.insertConsole(console);
+			ProductDatabase.insertConsole(console, session);
 
-			console = ProductDatabase.findConsoleByName(name);
+			console = ProductDatabase.findConsoleByName(name, session);
+			Database.close(session);
 			return Response.ok(console.getProperties())
 					.status(200)
 					.build();
 		}
 		else
 		{
+			Database.close(session);
 			return new ServerResponse("FORBIDDEN USER", 403, new Headers<Object>());
 		}
 	}
@@ -668,18 +980,21 @@ public class ProductService
 			@PathParam("name") String name,
 			@Context HttpRequest request)
 	{
-		Console console = 	ProductDatabase.findConsoleByID(id_console);
+		Session session = Database.init();
+		Console console = 	ProductDatabase.findConsoleByID(id_console, session);
 		if(console != null){
 
 			console.setName(name);
-			ProductDatabase.insertConsole(console);
+			ProductDatabase.insertConsole(console, session);
 
+			Database.close(session);
 			return Response.ok(console.getProperties())
 					.status(200)
 					.build();
 		}
 		else
 		{
+			Database.close(session);
 			return new ServerResponse("FORBIDDEN USER", 404, new Headers<Object>());
 		}
 	}
@@ -696,6 +1011,7 @@ public class ProductService
 	@Path("/reviews/{id}")
 	public Response deleteReview(@PathParam("id") int id_review, @Context HttpServletRequest request)
 	{
+		Session session = Database.init();
 		User user = (User) request.getSession().getAttribute("USER");
 		Response response;
 		if(user == null)
@@ -704,7 +1020,7 @@ public class ProductService
 		}
 		else 
 		{
-			Review review = ProductDatabase.findReviewByID(id_review);
+			Review review = ProductDatabase.findReviewByID(id_review, session);
 			if(review == null || request.getAttribute("INTERCEPTOR-ID-USER")==null || review.getId_user() != user.getId() || user.getId() != (int)request.getAttribute("INTERCEPTOR-ID-USER"))
 			{
 				response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
@@ -712,10 +1028,12 @@ public class ProductService
 			else
 			{
 
-				ProductDatabase.deleteReview(review);
+				ProductDatabase.deleteReview(review, session);
 				response = Response.ok("SUCCESS").build();
 			}	
+		
 		}
+		Database.close(session);
 		return response;
 	}
 
@@ -738,16 +1056,18 @@ public class ProductService
 			@PathParam("product") int id_product,
 			@Context HttpServletRequest request)
 	{
+		Session session = Database.init();
 		User user = (User) request.getSession().getAttribute("USER");
-		Product product = ProductDatabase.findProductByID(id_product);
+		Product product = ProductDatabase.findProductByID(id_product, session);
 
 		Response response;
-
+		System.out.println("REVIEW "+id_product +" ADD "+user.getId() + " "+request.getAttribute("INTERCEPTOR-ID-USER")+" "+product);
 		if(user!= null && product!=null && user.getId() == (int) request.getAttribute("INTERCEPTOR-ID-USER"))
 		{
-			Review review = ProductDatabase.findReviewByKey(user, product);			
+			Review review = ProductDatabase.findReviewByKey(user, product, session);			
 			if(review != null)
 			{
+				System.out.println("REVIEW existe deja "+review.getTitle());
 				response  = new ServerResponse("FORBIDDEN REVIEW", 403, new Headers<Object>());
 			}
 			else
@@ -758,14 +1078,19 @@ public class ProductService
 				review.setContent(content);
 				review.setId_user(user.getId());
 				review.setId_product(id_product);
-				ProductDatabase.insertReview(review);
+				ProductDatabase.insertReview(review, session);
 				response = Response.ok(review.getProperties()).build();
+
+				System.out.println("REVIEW AJOUTE");
 			}		
 		}
 		else
 		{
+			System.out.println("REVIEW PB");
 			response  = new ServerResponse("FORBIDDEN USER", 403, new Headers<Object>());
 		}
+		
+		Database.close(session);
 
 		return response;
 	}
@@ -788,7 +1113,8 @@ public class ProductService
 
 			@Context HttpRequest request)
 	{
-		Review review = ProductDatabase.findReviewByID(id_review);
+		Session session = Database.init();
+		Review review = ProductDatabase.findReviewByID(id_review, session);
 
 		Response response;
 		if(review == null)
@@ -800,9 +1126,11 @@ public class ProductService
 			review.setContent(content);
 			review.setNote(note);
 			review.setTitle(title);
-			ProductDatabase.insertReview(review);				
+			ProductDatabase.insertReview(review, session);				
 			response = Response.ok(review.getProperties()).build();
 		}		
+		
+		Database.close(session);
 		return response;
 	}
 
@@ -818,7 +1146,8 @@ public class ProductService
 	@Path("/products/{id_product}/reviews")
 	public Response getReviews(@PathParam("id_product") int id_product, @Context HttpRequest request)
 	{
-		Product product = ProductDatabase.findProductByID(id_product);
+		Session session = Database.init();
+		Product product = ProductDatabase.findProductByID(id_product, session);
 		Response response;
 		if(product == null)
 		{
@@ -836,7 +1165,9 @@ public class ProductService
 			}
 
 			response = Response.ok(json).build();
-		}		
+		}
+		
+		Database.close(session);
 		return response;
 
 	}
@@ -851,31 +1182,63 @@ public class ProductService
 	 */
 	@RolesAllowed({"ADMIN"})
 	@POST
-	@Path("/picture/{name}/{link}/{product}")
-	public Response addPicture(@PathParam("name") String name,
-			@PathParam("link") String link,
+	@Path("/pictures/{link}/{product}")
+	public Response addPicture(@PathParam("link") String link,
 			@PathParam("product") int id_product,@Context HttpRequest request)
 	{
-		Product product = ProductDatabase.findProductByID(id_product);
-		Picture picture = ProductDatabase.findPictureByName(name);
+		Session session = Database.init();
+		String name = UUID.randomUUID().toString();
+		Product product = ProductDatabase.findProductByID(id_product, session);
+		Picture picture = ProductDatabase.findPictureByName(name, session);
 		if(product != null && picture == null){
 			picture = new Picture();
 			picture.setName(name);
 			picture.setId_product(id_product);
 			picture.setImg(link);
 
-			ProductDatabase.insertPicture(picture);
+			ProductDatabase.insertPicture(picture, session);
 
-			picture = ProductDatabase.findPictureByName(name);
+			picture = ProductDatabase.findPictureByName(name, session);
+			Database.close(session);
 			return Response.ok(picture.getProperties())
 					.status(200)
 					.build();
 		}
 		else
 		{
+			Database.close(session);
 			return new ServerResponse("FORBIDDEN USER", 403, new Headers<Object>());
 		}
 	}
+	
+	
+	@RolesAllowed({"ADMIN"})
+	@DELETE
+	@Path("/pictures/{id}")
+	public Response delPicture(@PathParam("id") int id,@Context HttpRequest request)
+	{
+		Session session = Database.init();
+		
+		
+		Picture picture = ProductDatabase.findPictureByID(id, session);
+		
+		if(picture != null){
+			Product product = ProductDatabase.findProductByID(picture.getId_product(), session);
+			product.getPictures().remove(picture);
+			ProductDatabase.insertProduct(product, session);
+			ProductDatabase.deletePictureByID(id, session);
+			Database.close(session);
+			return Response.ok()
+					.status(200)
+					.build();
+		}
+		else
+		{
+			Database.close(session);
+			return new ServerResponse("FORBIDDEN USER", 403, new Headers<Object>());
+		}
+	}
+
 
 	/**
 	 * add pegi
@@ -891,21 +1254,60 @@ public class ProductService
 			@PathParam("link") String img
 			,@Context HttpRequest request)
 	{
-		PegiClassification pegi = ProductDatabase.findPegiByName(name);
+		Session session = Database.init();
+		PegiClassification pegi = ProductDatabase.findPegiByName(name, session);
 		if(pegi == null){
 			pegi = new PegiClassification();
 			pegi.setName(name);
 			pegi.setImg(img);
 
-			ProductDatabase.insertPegi(pegi);
+			ProductDatabase.insertPegi(pegi, session);
 
-			pegi = ProductDatabase.findPegiByName(name);
+			pegi = ProductDatabase.findPegiByName(name, session);
+			Database.close(session);
 			return Response.ok(pegi.getProperties())
 					.status(200)
 					.build();
 		}
 		else
 		{
+			Database.close(session);
+			return new ServerResponse("FORBIDDEN USER", 403, new Headers<Object>());
+		}
+	}
+
+	
+
+	/**
+	 * add pegi
+	 * @param name
+	 * @param img
+	 * @param request
+	 * @return
+	 */
+	@RolesAllowed({"ADMIN"})
+	@PUT
+	@Path("/pegi/{id}/{name}/{link}")
+	public Response updtPegi(@PathParam("id") int id, @PathParam("name") String name,
+			@PathParam("link") String img
+			,@Context HttpRequest request)
+	{
+		Session session = Database.init();
+		PegiClassification pegi = ProductDatabase.findPegiByID(id, session);
+		if(pegi != null){
+			pegi.setName(name);
+			pegi.setImg(img);
+
+			ProductDatabase.insertPegi(pegi, session);
+
+			Database.close(session);
+			return Response.ok(pegi.getProperties())
+					.status(200)
+					.build();
+		}
+		else
+		{
+			Database.close(session);
 			return new ServerResponse("FORBIDDEN USER", 403, new Headers<Object>());
 		}
 	}

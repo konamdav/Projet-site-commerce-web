@@ -32,6 +32,7 @@ import org.jboss.resteasy.spi.interception.PreProcessInterceptor;
 import org.jboss.resteasy.spi.metadata.ResourceMethod;
 import org.jboss.resteasy.util.Base64;
 
+import generic.Database;
 import user.User;
 import user.UserDatabase;
 
@@ -55,9 +56,11 @@ public class SecurityInterceptor implements PreProcessInterceptor
 		request.setAttribute("INTERCEPTOR-ID-USER", null);
 		Method method = methodInvoked.getMethod();
 
+		System.out.println("interceptor");
 
 		if(method.isAnnotationPresent(PermitAll.class))
 		{
+			System.out.println("ok");
 			return null;
 		}
 
@@ -68,15 +71,12 @@ public class SecurityInterceptor implements PreProcessInterceptor
 
 
 		final HttpHeaders headers = request.getHttpHeaders();
-
-
-
-
 		final List<String> authorization = headers.getRequestHeader(AUTHORIZATION_PROPERTY);
 
 
 		if(authorization == null || authorization.isEmpty())
 		{
+			System.out.println("pas d'auth");
 			return ACCESS_DENIED;
 		}
 
@@ -87,10 +87,11 @@ public class SecurityInterceptor implements PreProcessInterceptor
 		try {
 			usernameAndPassword = new String(Base64.decode(encodedUserPassword));
 		} catch (IOException e) {
+
 			return SERVER_ERROR;
 		}
 
-
+		System.out.println("AUTH STR => "+usernameAndPassword);
 		final StringTokenizer tokenizer = new StringTokenizer(usernameAndPassword, ":");
 		final String username = tokenizer.nextToken();
 		final String password = tokenizer.nextToken();
@@ -117,6 +118,7 @@ public class SecurityInterceptor implements PreProcessInterceptor
 
 	private boolean isUserAllowed(final String username, final String password, final Set<String> rolesSet, HttpRequest request) 
 	{
+		Session session = Database.init();
 		System.out.println("check auth ...");
 		boolean isAllowed = false;
 
@@ -124,7 +126,7 @@ public class SecurityInterceptor implements PreProcessInterceptor
 		user.setUsername(username);
 		user.setPassword(password);
 
-		user = UserDatabase.findByCriteria(username, password);
+		user = UserDatabase.findByCriteria(username, password, session);
 
 
 
@@ -139,6 +141,8 @@ public class SecurityInterceptor implements PreProcessInterceptor
 		{
 			//System.out.println("bad auth :/"+user.getProperties());
 		}
+		
+		Database.close(session);
 		return isAllowed;
 	}
 }

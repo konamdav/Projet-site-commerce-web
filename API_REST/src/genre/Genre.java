@@ -14,7 +14,8 @@ import generic.Functions;
 public class Genre extends DataBaseEntity {
 	
 	@Id
-	private int id;
+	private int id ;
+	
 	@Column
 	private String name;
 	
