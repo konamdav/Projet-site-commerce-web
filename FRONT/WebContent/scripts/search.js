@@ -23,6 +23,7 @@ function successSearch(response)
 			productsDiv.innerHTML += '<tr id="res_'+products[i].id+'">'
 			+'<td>'+products[i].id+'</td>'
 			+'<td><a href="product.jsp?id='+products[i].id+'">'+products[i].videogame.name+'</a></td>'
+			+'<td><a href="product.jsp?id='+products[i].id+'">'+products[i].console.name+'</a></td>'
 			+'</tr>';
 
 		}

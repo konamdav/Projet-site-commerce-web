@@ -32,7 +32,7 @@ function successGetProduct(response)
 	for(i=0; i<product.pictures.length;++i)
 	{
 		pictures.innerHTML += '<div class="card">'
-			+'<img src="'+product.pictures[i].img+'" class="img-fluid" alt="'+product.pictures[i].name+'"/>'
+			+'<img src="'+product.pictures[i].img+'" height="100" class="img-fluid" alt="'+product.pictures[i].name+'"/>'
 			+'<div class="mask"></div>'
 			+'</div>';
 	}

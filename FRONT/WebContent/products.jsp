@@ -39,7 +39,8 @@
 						<thead>
 							<tr>
 								<th>#</th>
-								<th>Produit</th>
+								<th>Jeu video</th>
+								<th>Console</th>
 							</tr>
 						</thead>
 

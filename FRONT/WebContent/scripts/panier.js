@@ -129,7 +129,6 @@ function successUpdate(response)
 
 function payPanier()
 {	
-	alert("pay ");
 	callProtectedWebServiceByAjax("PUT", "http://localhost:8080/API_REST/rest/users-service/user/panier/pay", getCookie("username"), getCookie("password"), successPay, failurePay);
 	return false;
 }

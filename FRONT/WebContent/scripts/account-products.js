@@ -76,7 +76,7 @@ function submitCreateProduct()
 
 function submitUpdateProduct()
 {	
-	alert("ok");
+	
 	var form = document.forms["update"];
 	id_product = form["id_product"].value;
 	id_console = form["id_console"].value;
@@ -84,10 +84,9 @@ function submitUpdateProduct()
 	date_release = form["date_release"].value;
 	price  = form["price"].value;
 
-	alert("http://localhost:8080/API_REST/rest/products-service/products/"+id_product+"/"+id_videogame+"/"+id_console+"/"+price+"/"+date_release);
 	callProtectedWebServiceByAjax("PUT", "http://localhost:8080/API_REST/rest/products-service/products/"+id_product+"/"+id_videogame+"/"+id_console+"/"+price+"/"+date_release, 
 			getCookie("username"), getCookie("password"),successUpdateProduct, undefined);
-
+	 
 	return false;
 }
 
@@ -162,7 +161,7 @@ function removePicture(id)
 
 function successAddPicture(response)
 {
-	alert("successAdd");
+
 
 	var form = document.forms["update"];
 	id = form["id_product"].value;

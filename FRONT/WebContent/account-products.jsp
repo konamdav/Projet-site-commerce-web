@@ -70,7 +70,7 @@
 			</form>
 			<hr>
 			<h2>Modification</h2>
-<form id="update" action="" method="post" 	onsubmit="return submitUpdateVideogame();">
+<form id="update" action="" method="post" 	onsubmit="return submitUpdateProduct();">
    <input type="hidden" name="id_product" id="id_product" />
    <div style="width: 19%; display: inline-block;">Jeu video :</div>
    <select style="height: 30px; width: 80%" id="id_videogame"
