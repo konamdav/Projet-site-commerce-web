@@ -7,7 +7,8 @@
 		aria-label="Toggle navigation">
 		<span class="navbar-toggler-icon"></span>
 	</button>
-	<a class="navbar-brand" href="#">Menu</a>
+	
+	<a class="navbar-brand" href="index.jsp"><img style="margin-top: -20px" src="logo.png" width="50"/>Menu</a>
 
 	<div class="collapse navbar-collapse" id="navbarsExampleDefault">
 		<ul class="navbar-nav mr-auto">

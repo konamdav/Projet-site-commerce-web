@@ -27,7 +27,7 @@
 	</jsp:include>
 
 	<jsp:include page="menu-account.jsp">
-		<jsp:param name="curr" value="CONSOLES" />
+		<jsp:param name="curr" value="PUBLISHERS" />
 	</jsp:include>
 
 	<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">

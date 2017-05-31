@@ -586,7 +586,7 @@ public class UserService
 			user.setUsername(username);
 			user.setPassword(Base64.encodeBytes(password.getBytes()));
 
-			System.out.println("PASSWORD CRYPT "+user.getPassword());
+			//System.out.println("PASSWORD CRYPT "+user.getPassword());
 
 			UserDatabase.saveUser(user, session);
 
@@ -602,6 +602,9 @@ public class UserService
 		}
 	}
 
+	
+	
+	
 
 	/**
 	 * Update user
@@ -616,8 +619,8 @@ public class UserService
 
 	@RolesAllowed({"ADMIN", "USER"})
 	@PUT
-	@Path("/user/{username}/{password}/{firstname}/{surname}/{mail}")
-	public Response updateUser(@PathParam("username") String username, @PathParam("password") String password,
+	@Path("/user/{username}/{firstname}/{surname}/{mail}")
+	public Response updateUser(@PathParam("username") String username, 
 			@PathParam("firstname") String firstname, @PathParam("surname") String surname, 
 			@PathParam("mail") String mail, @Context HttpServletRequest request
 			)
@@ -644,6 +647,43 @@ public class UserService
 				user.setFirstname(firstname);
 				user.setSurname(surname);
 				user.setMail(mail);
+
+				UserDatabase.saveUser(user, session);
+				json = user.getProperties();
+
+				response = Response.ok(json).build();
+			}	
+		}
+		
+		Database.close(session);
+		return response;
+	}
+	
+	
+	@RolesAllowed({"ADMIN", "USER"})
+	@PUT
+	@Path("/user/password/{password}")
+	public Response updatePassword(@PathParam("password") String password, @Context HttpServletRequest request
+			)
+	{
+
+		User user = (User) request.getSession().getAttribute("USER");	
+		Session session = Database.init();
+		Response response;
+		if(user == null)
+		{
+			response  = new ServerResponse("NOT FOUND", 404, new Headers<Object>());
+		}
+		else 
+		{
+			if(	request.getAttribute("INTERCEPTOR-ID-USER")==null || user.getId() != (int)request.getAttribute("INTERCEPTOR-ID-USER"))
+			{
+				response  = new ServerResponse("FORBIDDEN", 403, new Headers<Object>());
+			}
+			else
+			{
+				String json ="";
+				user.setPassword(Base64.encodeBytes(password.getBytes()));
 
 				UserDatabase.saveUser(user, session);
 				json = user.getProperties();

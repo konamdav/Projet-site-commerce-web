@@ -27,7 +27,7 @@
 	</jsp:include>
 
 	<jsp:include page="menu-account.jsp">
-		<jsp:param name="curr" value="ADD_PUBLISHER" />
+		<jsp:param name="curr" value="VIDEOGAMES" />
 	</jsp:include>
 
 	<main class="col-sm-9 offset-sm-3 col-md-8 offset-md-2 pt-3">

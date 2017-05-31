@@ -30,6 +30,7 @@
 	<!-- Main jumbotron for a primary marketing message or call to action -->
 	<div class="jumbotron">
 		<div class="container">
+			<img width="200" style="float:right;" src="logo.png" />
 			<h1 class="display-3">Game Shop</h1>
 			<p>Bienvenue sur l'espace de vente de jeux vidéos</p>
 			<p>
@@ -47,9 +48,6 @@
 		<h2 class="display-5">Découverte</h2>
 		<hr>
 		<div id="discovery" class="row"></div>
-
-
-
 		<hr>
 
 		<footer>

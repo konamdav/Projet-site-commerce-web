@@ -17,6 +17,7 @@
 <link href="dashboard.css" rel="stylesheet">
 <script type="text/javascript" src="scripts/script.js"></script>
 <script type="text/javascript" src="scripts/panier.js"></script>
+<script type="text/javascript" src="scripts/updateUser.js"></script>
 </head>
 
 <body>
@@ -26,7 +27,7 @@
 	</jsp:include>
 
 <jsp:include page="menu-account.jsp">
-		<jsp:param name="curr" value="UPDATE_INFOS" />
+		<jsp:param name="curr" value="PROFILE" />
 	</jsp:include>
 
 
@@ -37,30 +38,30 @@
 		<div class="col-6">
 			<h2>Modifier mes informations</h2>
 
-			<form action="" name="formSignin" method="post"
-				onsubmit="return submitSignin();">
+			<form action="" name="updateProfile" method="post"
+				onsubmit="return submitUpdateProfile();">
 				<div class="form-group">
-					<label for="id_user">Username</label> <input type="text"
+					<label for="username">Username</label> <input type="text"
 						class="form-control" id="username" name="username"
 						placeholder="Username">
 				</div>
 				<div class="form-group">
-					<label for="">Firstname</label> <input type="text"
+					<label for="firstname">Firstname</label> <input type="text"
 						class="form-control" id="firstname" name="firstname"
 						placeholder="Firstname">
 				</div>
 				<div class="form-group">
-					<label for="">Surname</label> <input type="text"
+					<label for="surname">Surname</label> <input type="text"
 						class="form-control" id="surname" name="surname"
 						placeholder="Surname">
 				</div>
 
 				<div class="form-group">
-					<label for="email_user">Mail</label> <input type="email"
+					<label for="mail">Mail</label> <input type="email"
 						class="form-control" id="mail" name="mail"
 						aria-describedby="emailHelp" placeholder="Mail"> <small
 						id="emailHelp" class="form-text text-muted">Votre adresse
-						ne sera jamais partagÃ©.</small>
+						ne sera jamais partagée.</small>
 				</div>
 				<button type="submit" class="btn btn-green">Modifier</button>
 			</form>
@@ -68,15 +69,15 @@
 		<div class="col-4">
 			<h2>Modifier mon mot de passe</h2>
 
-			<form action="" name="formSignin" method="post"
-				onsubmit="return submitSignin();">
+			<form action="" name="updatePassword" method="post"
+				onsubmit="return submitUpdatePassword();">
 				<div class="form-group">
-					<label for="mdp_user">Mot de passe</label> <input type="password"
+					<label for="password">Mot de passe</label> <input type="password"
 						class="form-control" id="password" name="password"
 						placeholder="Mot de passe">
 				</div>
 				<div class="form-group">
-					<label for="mdp_user2">Confirmer le mot de passe</label> <input
+					<label for="password2">Confirmer le mot de passe</label> <input
 						type="password" class="form-control" id="password2"
 						name="password2" placeholder="Confirmer mot de passe">
 				</div>
@@ -90,7 +91,12 @@
 	</main>
 	</div>
 	</div>
+<script>
+		window.onload = function() {
+			loadProfile();
 
+		}
+	</script>
 	<!-- Bootstrap core JavaScript
     ================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
