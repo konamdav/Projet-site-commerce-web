@@ -21,6 +21,7 @@ public class UserDatabase {
 	{
 		session.beginTransaction();
 		User usr = (User) session.get(User.class,id);
+		session.refresh(usr);
 		session.getTransaction().commit();
 		return usr;
 

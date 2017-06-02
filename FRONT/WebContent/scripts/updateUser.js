@@ -13,6 +13,8 @@ function submitUpdateProfile(){
 
 function successUpdateProfile(response)
 {
+	var user = JSON.parse(response);
+	document.cookie = 'username='+user.username+'; expires=Fri, 31 Dec 2020 23:59:59 GMT';
 	loadProfile();
 }
 
@@ -67,6 +69,8 @@ function successLoadProfile(response)
 	form["mail"].value = user.mail;
 	form["firstname"].value = user.firstname;
 	form["surname"].value = user.surname;
+	
+	
 
 }
 

@@ -642,6 +642,9 @@ public class UserService
 			else
 			{
 				String json ="";
+				
+				user = UserDatabase.findUserByID(user.getId(), session);
+				
 				user.setUsername(username);
 				//user.setPassword(Base64.encodeBytes(password.getBytes()));
 				user.setFirstname(firstname);
@@ -649,6 +652,7 @@ public class UserService
 				user.setMail(mail);
 
 				UserDatabase.saveUser(user, session);
+				request.getSession().setAttribute("USER", user);
 				json = user.getProperties();
 
 				response = Response.ok(json).build();
@@ -682,10 +686,12 @@ public class UserService
 			}
 			else
 			{
+				user = UserDatabase.findUserByID(user.getId(), session);
 				String json ="";
 				user.setPassword(Base64.encodeBytes(password.getBytes()));
 
 				UserDatabase.saveUser(user, session);
+				request.getSession().setAttribute("USER", user);
 				json = user.getProperties();
 
 				response = Response.ok(json).build();

@@ -31,7 +31,7 @@
 	<br>
 	<br>
 	<div class="container">
-
+		
 		<h1>Gestion de votre panier</h1>
 		<div class="row">
 			<div class="col-md-5">
