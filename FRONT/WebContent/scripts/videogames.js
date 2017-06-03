@@ -89,11 +89,46 @@ function submitCreateVideogame()
 	var form = document.forms["create"];
 	name = form["name"].value;
 	id_publisher = form["id_publisher"].value;
+	
+	form["name"].className = "";
+	form["id_publisher"].className = "";
+	
+	success = document.getElementById("create-success");
+	success.innerHTML = "";
+	
+	failure = document.getElementById("create-error");
+	failure.innerHTML = "";
+	
 	//alert("http://localhost:8080/API_REST/rest/products-service/videogames/"+name+"/"+id_publisher);
-	callProtectedWebServiceByAjax("POST", "http://localhost:8080/API_REST/rest/products-service/videogames/"+name+"/"+id_publisher, getCookie("username"), getCookie("password"),successCreateVideogame, undefined);
+	callProtectedWebServiceByAjax("POST", "http://localhost:8080/API_REST/rest/products-service/videogames/"+name+"/"+id_publisher, getCookie("username"), getCookie("password"),successCreateVideogame, failureCreateVideogame);
 	return false;
 }
 
+function failureCreateVideogame(response)
+{
+	failure = document.getElementById("create-error");
+	failure.innerHTML = "<p>Une erreur est survenue lors de la validation </p>";
+	
+	if(response!=undefined)
+	{
+		var form = document.forms["create"];
+		form["name"].className = " has-error";
+		form["id_publisher"].className = " has-error";
+	}
+}
+
+function failureUpdateVideogame(response)
+{
+	failure = document.getElementById("update-error");
+	failure.innerHTML = "<p>Une erreur est survenue lors de la validation </p>";
+	
+	if(response!=undefined)
+	{
+		var form = document.forms["update"];
+		form["name"].className = " has-error";
+		form["id_publisher2"].className = " has-error";
+	}
+}
 
 function submitUpdateVideogame()
 {	
@@ -101,6 +136,15 @@ function submitUpdateVideogame()
 	name = form["name"].value;
 	id = form["id_videogame"].value;
 	id_publisher = form["id_publisher2"].value;
+	
+	form["name"].className = "";
+	form["id_publisher2"].className = "";
+	
+	success = document.getElementById("update-success");
+	success.innerHTML = "";
+	
+	failure = document.getElementById("update-error");
+	failure.innerHTML = "";
 
 	callProtectedWebServiceByAjax("PUT", "http://localhost:8080/API_REST/rest/products-service/videogames/"+id+"/"+name+"/"+id_publisher, getCookie("username"), getCookie("password"),successUpdateVideogame, failureUpdateVideogame);
 	return false;
@@ -125,18 +169,17 @@ function successVideogames(response)
 
 function successCreateVideogame(response)
 {
+	success = document.getElementById("create-success");
+	success.innerHTML = "<p>Formulaire validé avec succès</p>";
 	loadVideogames();
 }
 
 //
 function successUpdateVideogame(response)
 {
+	success = document.getElementById("update-success");
+	success.innerHTML = "<p>Formulaire validé avec succès</p>";
 	loadVideogames();
-}
-
-function failureUpdateVideogame(response)
-{
-
 }
 
 function removeGenre(id)

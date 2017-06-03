@@ -12,6 +12,7 @@
 				</li>
 			</ul>
 
+			<%if (request.getSession().getAttribute("ADMIN")!=null) {%>
 			<ul class="nav nav-pills flex-column">
 				<li class="nav-item "><a class="nav-link <%if (request.getParameter("curr").equals("PEGI")) {%> active <%}%>" href="account-pegi.jsp">PEGI</a></li>
 				<li class="nav-item "><a class="nav-link <%if (request.getParameter("curr").equals("GENRES")) {%> active <%}%>" href="account-genres.jsp">Genres</a></li>
@@ -22,7 +23,7 @@
 
 
 			</ul>
-
+	<%} %>
 		</nav>
 	</div>
 </div>

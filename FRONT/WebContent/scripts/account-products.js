@@ -63,19 +63,37 @@ function successVideogames(response)
 
 function submitCreateProduct()
 {	
+
+	success = document.getElementById("create-success");
+	success.innerHTML = "";
+	
+	failure = document.getElementById("create-error");
+	failure.innerHTML = "";
+	
 	var form = document.forms["create"];
 	id_console = form["id_console"].value;
 	id_videogame = form["id_videogame"].value;
 	year = form["date_release"].value;
 	price  = form["price"].value;
 
-	callProtectedWebServiceByAjax("POST", "http://localhost:8080/API_REST/rest/products-service/products/"+id_videogame+"/"+id_console+"/"+price+"/"+year, getCookie("username"), getCookie("password"),successCreateProduct, undefined);
+	form["id_console"].className ="";
+	form["id_videogame"].className ="";
+	form["date_release"].className ="";
+	form["price"].className ="";
+	
+	callProtectedWebServiceByAjax("POST", "http://localhost:8080/API_REST/rest/products-service/products/"+id_videogame+"/"+id_console+"/"+price+"/"+year, getCookie("username"), getCookie("password"),successCreateProduct, failureCreateProduct);
 	return false;
 }
 
 
 function submitUpdateProduct()
 {	
+
+	success = document.getElementById("update-success");
+	success.innerHTML = "";
+	
+	failure = document.getElementById("update-error");
+	failure.innerHTML = "";
 	
 	var form = document.forms["update"];
 	id_product = form["id_product"].value;
@@ -83,32 +101,67 @@ function submitUpdateProduct()
 	id_videogame = form["id_videogame"].value;
 	date_release = form["date_release"].value;
 	price  = form["price"].value;
+	
+	form["id_console"].className ="";
+	form["id_videogame"].className ="";
+	form["date_release"].className ="";
+	form["price"].className ="";
 
 	callProtectedWebServiceByAjax("PUT", "http://localhost:8080/API_REST/rest/products-service/products/"+id_product+"/"+id_videogame+"/"+id_console+"/"+price+"/"+date_release, 
-			getCookie("username"), getCookie("password"),successUpdateProduct, undefined);
+			getCookie("username"), getCookie("password"),successUpdateProduct, failureUpdateProduct);
 	 
 	return false;
 }
 
 
+function failureCreateProduct(response)
+{
+	failure = document.getElementById("create-error");
+	failure.innerHTML = "<p>Une erreur est survenue lors de la validation </p>";
+	
+	if(response!=undefined)
+	{
+		var form = document.forms["create"];
+		form["id_console"].className +=" has-error";
+		form["id_videogame"].className +=" has-error";
+		form["date_release"].className +=" has-error";
+		form["price"].className +=" has-error";
+	}
+}
+
+function failureUpdateProduct(response)
+{
+	failure = document.getElementById("update-error");
+	failure.innerHTML = "<p>Une erreur est survenue lors de la validation </p>";
+	
+	if(response!=undefined)
+	{
+		var form = document.forms["update"];
+		form["id_product"].className +=" has-error";
+		form["id_console"].className +=" has-error";
+		form["id_videogame"].className +=" has-error";
+		form["date_release"].className +=" has-error";
+		form["price"].className +=" has-error";
+	}
+}
 
 
 
 function successCreateProduct(response)
 {
+	success = document.getElementById("create-success");
+	success.innerHTML = "<p>Formulaire validé avec succès</p>";
 	loadProducts();
 }
 
 
 function successUpdateProduct(response)
 {
+	success = document.getElementById("update-success");
+	success.innerHTML = "<p>Formulaire validé avec succès</p>";
 	loadProducts();
 }
 
-function failureUpdateProduct(response)
-{
-
-}
 
 function selectUpdateProduct(id)
 {
@@ -155,14 +208,11 @@ function removePicture(id)
 {
 
 	callProtectedWebServiceByAjax("DELETE", "http://localhost:8080/API_REST/rest/products-service/pictures/"+id, getCookie("username"), getCookie("password"),successAddPicture, undefined);
-
 	return false;
 }
 
 function successAddPicture(response)
 {
-
-
 	var form = document.forms["update"];
 	id = form["id_product"].value;
 	callWebServiceByAjax("GET", "http://localhost:8080/API_REST/rest/products-service/products/"+id, loadUpdatedProduct, undefined);

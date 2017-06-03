@@ -26,11 +26,14 @@
 		<jsp:param name="curr" value="COMPTE" />
 	</jsp:include>
 
-<jsp:include page="menu-account.jsp">
+<%
+		if (request.getSession().getAttribute("USER") != null) {
+	%>
+	<jsp:include page="menu-account.jsp">
 		<jsp:param name="curr" value="PROFILE" />
 	</jsp:include>
 
-
+	
 	<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
 	<h1>Mon compte</h1>
 
@@ -91,19 +94,27 @@
 	</main>
 	</div>
 	</div>
-<script>
+	<script>
 		window.onload = function() {
 			loadProfile();
 
 		}
 	</script>
+
+	<%
+		}
+	%>
 	<!-- Bootstrap core JavaScript
     ================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
 	<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"
 		integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
 		crossorigin="anonymous"></script>
-	<script>window.jQuery || document.write('<script src="assets/js/vendor/jquery.min.js"><\/script>')</script>
+	<script>
+		window.jQuery
+				|| document
+						.write('<script src="assets/js/vendor/jquery.min.js"><\/script>')
+	</script>
 	<script
 		src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"
 		integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"

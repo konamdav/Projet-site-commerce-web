@@ -34,18 +34,23 @@
 
 	<section class="jumbotron text-center">
 		<div class="container">
-			<h1 >Ajout d'un avis</h1>
+			<h1>Ajout d'un avis</h1>
 			<hr>
 		</div>
 		<br>
 
 		<div class="container ">
 			<div class="col text-center">
-				<form align="center" class ="text-center" action="" method="post"
+				<div id="success"></div>
+				<div style="color: red" id="error"></div>
+				<form align="center" class="text-center" action="" method="post"
 					onsubmit="return submitNewAvis(<%=request.getParameter("id")%>);">
-					<div style="width:19%; display:inline-block;">Titre :</div> <input style="width:80%" id="title" name="title" type="text"> 
-					<br><br>
-					<div style="width:20%; display:inline-block;">Note :</div><select style="width:80%" id="note">
+					<div style="width: 19%; display: inline-block;">Titre :</div>
+					<input style="width: 80%" id="title" name="title" type="text">
+					<br>
+					<br>
+					<div style="width: 20%; display: inline-block;">Note :</div>
+					<select style="width: 80%" id="note">
 						<option value="0">0</option>
 						<option value="1">1</option>
 						<option value="2">2</option>
@@ -58,9 +63,11 @@
 						<option value="9">9</option>
 						<option value="10">10</option>
 					</select> <br> <br>
-					<textarea style="height:100px;width:100%" id="content"></textarea><br><br>
+					<textarea style="height: 100px; width: 100%" id="content"></textarea>
+					<br>
+					<br>
 					<button type="submit" class="btn btn-primary">Valider</button>
-					
+
 				</form>
 
 			</div>
@@ -73,7 +80,7 @@
 
 	<div class="container">
 		<footer>
-			<p>&copy; Company 2017</p>
+			<p>&copy; David KONAM & Clément PASSOT | SR03 | 2017</p>
 		</footer>
 	</div>
 

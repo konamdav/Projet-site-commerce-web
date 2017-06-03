@@ -25,10 +25,13 @@
 	<jsp:include page="menu.jsp">
 		<jsp:param name="curr" value="COMPTE" />
 	</jsp:include>
-
+<%
+			if(request.getSession().getAttribute("ADMIN")!=null && request.getSession().getAttribute("USER")!=null){
+		%>
 	<jsp:include page="menu-account.jsp">
 		<jsp:param name="curr" value="PRODUCTS" />
 	</jsp:include>
+
 
 	<main class="col-sm-9 offset-sm-3 col-md-8 offset-md-2 pt-3">
 	<h1>Mon compte</h1>
@@ -51,6 +54,9 @@
 		</div>
 		<div class="col-md">
 			<h2>Création</h2>
+			<div id="create-success"></div>
+			<div style="color: red" id="create-error"></div>
+
 			<form id="create" action="" method="post"
 				onsubmit="return submitCreateProduct();">
 				<div style="width: 19%; display: inline-block;">Jeu video :</div>
@@ -70,38 +76,41 @@
 			</form>
 			<hr>
 			<h2>Modification</h2>
-<form id="update" action="" method="post" 	onsubmit="return submitUpdateProduct();">
-   <input type="hidden" name="id_product" id="id_product" />
-   <div style="width: 19%; display: inline-block;">Jeu video :</div>
-   <select style="height: 30px; width: 80%" id="id_videogame"
-      name="id_videogame"></select> <br> <br>
-   <div style="width: 19%; display: inline-block;">Console :</div>
-   <select style="height: 30px; width: 80%" id="id_console"
-      name="id_console"></select> <br> <br>
-   <div style="width: 19%; display: inline-block;">Prix :</div>
-   <input style="width: 80%" id="price" name="price" type="text">
-   <br> <br>
-   <div style="width: 19%; display: inline-block;">Année :</div>
-   <input style="width: 80%" id="date_release" name="date_release"
-      type="text"> <br> <br>
-   <div class="row">
-      <div class="col-md-6">
-         <div class="table-responsive" style="max-height: 200px;">
-            <table class="table table-striped">
-               <tbody id="pictures">
-               </tbody>
-            </table>
-         </div>
-      </div>
-      <div class="col-md-6">
-         <div style="width: 25%; display: inline-block;">Image :</div>
-         <input style="width: 73%" id="picture" name="picture" type="text">
-         <br> <br>
-         <button onclick="addPicture();" class="btn btn-secondary">Ajout</button>
-      </div>
-   </div>
-   <button type="submit" class="btn btn-primary">Modifier</button>
-</form>
+			<div id="update-success"></div>
+			<div style="color: red" id="update-error"></div>
+			<form id="update" action="" method="post"
+				onsubmit="return submitUpdateProduct();">
+				<input type="hidden" name="id_product" id="id_product" />
+				<div style="width: 19%; display: inline-block;">Jeu video :</div>
+				<select style="height: 30px; width: 80%" id="id_videogame"
+					name="id_videogame"></select> <br> <br>
+				<div style="width: 19%; display: inline-block;">Console :</div>
+				<select style="height: 30px; width: 80%" id="id_console"
+					name="id_console"></select> <br> <br>
+				<div style="width: 19%; display: inline-block;">Prix :</div>
+				<input style="width: 80%" id="price" name="price" type="text">
+				<br> <br>
+				<div style="width: 19%; display: inline-block;">Année :</div>
+				<input style="width: 80%" id="date_release" name="date_release"
+					type="text"> <br> <br>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="table-responsive" style="max-height: 200px;">
+							<table class="table table-striped">
+								<tbody id="pictures">
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div style="width: 25%; display: inline-block;">Image :</div>
+						<input style="width: 73%" id="picture" name="picture" type="text">
+						<br> <br>
+						<button onclick="addPicture();" class="btn btn-secondary">Ajout</button>
+					</div>
+				</div>
+				<button type="submit" class="btn btn-primary">Modifier</button>
+			</form>
 
 
 		</div>
@@ -118,6 +127,11 @@
 	</div>
 	</div>
 
+<%
+
+}
+
+%>
 
 
 	<!-- Bootstrap core JavaScript

@@ -26,9 +26,13 @@
 		<jsp:param name="curr" value="COMPTE" />
 	</jsp:include>
 
+<%
+			if(request.getSession().getAttribute("USER")!=null){
+		%>
 	<jsp:include page="menu-account.jsp">
 		<jsp:param name="curr" value="COMMANDES" />
 	</jsp:include>
+
 
 	<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
 	<h1>Mon compte</h1>
@@ -84,7 +88,7 @@
 	</div>
 	</div>
 
-
+	<%} %>
 
 	<!-- Bootstrap core JavaScript
     ================================================== -->

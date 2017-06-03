@@ -30,6 +30,10 @@
 		<jsp:param name="curr" value="GENRES" />
 	</jsp:include>
 
+	<%
+			if(request.getSession().getAttribute("ADMIN")!=null && request.getSession().getAttribute("USER")!=null){
+		%>
+
 	<main class="col-sm-9 offset-sm-3 col-md-8 offset-md-2 pt-3">
 	<h1>Mon compte</h1>
 	<div class="row">
@@ -50,24 +54,33 @@
 			</div>
 		</div>
 		<div class="col-md">
+
 			<h2>Création</h2>
-			<form id="create" action="" method="post" onsubmit="return submitCreateGenre();">
+			<div id="create-success"></div>
+			<div style="color: red" id="create-error"></div>
+			<form id="create" action="" method="post"
+				onsubmit="return submitCreateGenre();">
 				<div style="width: 19%; display: inline-block;">Genre :</div>
-				<input style="width: 80%" id="name" name="name" type="text">
-				<br><br>
+				<input required style="width: 80%" id="name" name="name" type="text">
+				<br>
+				<br>
 				<button type="submit" class="btn btn-primary">Créer</button>
 			</form>
 			<hr>
 			<h2>Modification</h2>
-			<form id="update" action="" method="post" onsubmit="return submitUpdateGenre();">
+			<div id="update-success"></div>
+			<div style="color: red" id="update-error"></div>
+			<form id="update" action="" method="post"
+				onsubmit="return submitUpdateGenre();">
 				<div style="width: 19%; display: inline-block;">Genre :</div>
-				<input style="width: 80%" id="name" name="name" type="text">
-				<br><br>
+				<input required style="width: 80%" id="name" name="name" type="text">
+				<br>
+				<br>
 				<button type="submit" class="btn btn-primary">Modifier</button>
-				<input type="hidden" name="id_genre" id="id_genre"/>
+				<input required type="hidden" name="id_genre" id="id_genre" />
 			</form>
-			
-			
+
+
 
 		</div>
 	</div>
@@ -81,7 +94,9 @@
 	</div>
 	</div>
 
-
+	<%
+			}
+	%>
 
 	<!-- Bootstrap core JavaScript
     ================================================== --> <!-- Placed at the end of the document so the pages load faster -->
@@ -90,7 +105,7 @@
 		crossorigin="anonymous"></script> <script>
 			window.jQuery
 					|| document
-							.write('<script src="assets/js/vendor/jquery.min.js"><\/script>')
+							.write('_$tag_________________________________________$tag_____')
 		</script> <script
 		src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"
 		integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"

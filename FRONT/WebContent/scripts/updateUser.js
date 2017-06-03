@@ -20,7 +20,7 @@ function successUpdateProfile(response)
 
 function failureUpdateProfile(response)
 {
-
+	
 }
 
 function submitUpdatePassword(){
@@ -69,9 +69,6 @@ function successLoadProfile(response)
 	form["mail"].value = user.mail;
 	form["firstname"].value = user.firstname;
 	form["surname"].value = user.surname;
-	
-	
-
 }
 
 

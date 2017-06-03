@@ -18,21 +18,14 @@
 
 			<%
 				if (request.getSession().getAttribute("USER") == null) {
-			%><li
+			%>
+			<li
 				class="nav-item <%if (request.getParameter("curr").equals("SIGNIN")) {%> active <%}%>"><a
 				class="nav-link" href="signin.jsp">Inscription/Connexion</a></li>
 			<%
 				}
 			%>
-			<%
-				if (request.getSession().getAttribute("USER") != null) {
-			%><li
-				class="nav-item <%if (request.getParameter("curr").equals("DECONNEXION")) {%> active <%}%>"><a
-				class="nav-link" onclick="disconnect();"href="">Deconnexion</a></li>
-			<%
-				}
-			%>
-
+			
 			<%
 				if (request.getSession().getAttribute("USER") != null) {
 			%><li
@@ -45,14 +38,14 @@
 			<li
 				class="nav-item <%if (request.getParameter("curr").equals("PRODUCTS")) {%> active <%}%>"><a
 				class="nav-link" href="products.jsp">Produits</a></li>
-		</ul>
-		<ul class="navbar-nav mr-auto">
+
 			<li
 				class="nav-item <%if (request.getParameter("curr").equals("PANIER")) {%> active <%}%>"><a
 				class="nav-link" href="panier.jsp"><span
 					class="glyphicon  glyphicon-shopping-cart"></span> Mon panier (<span
 					id="nbpanier">0</span>)</a></li>
 		</ul>
+			
 		<script type="text/javascript" src="scripts/panier.js"></script>
 		<script>
 			loadNbPanier();
@@ -64,6 +57,18 @@
 					placeholder="Recherche">
 				<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Recherche</button>
 			</form>
+		</ul>
+		
+		<ul class="navbar-nav mr-auto">
+			<%
+				if (request.getSession().getAttribute("USER") != null) {
+			%>
+			<li
+				class="nav-item <%if (request.getParameter("curr").equals("DECONNEXION")) {%> active <%}%>"><a
+				class="nav-link" onclick="disconnect();" role="button" >Deconnexion</a></li>
+			<%
+				}
+			%>
 		</ul>
 	</div>
 </nav>

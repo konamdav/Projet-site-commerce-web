@@ -54,7 +54,7 @@
 			</div>
 		</div>
 		<footer>
-			<p>&copy; Company 2017</p>
+			<p>&copy; David KONAM & Clément PASSOT | SR03 | 2017</p>
 		</footer>
 
 

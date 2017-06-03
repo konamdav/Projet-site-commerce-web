@@ -26,9 +26,14 @@
 		<jsp:param name="curr" value="COMPTE" />
 	</jsp:include>
 
+
+<%
+			if(request.getSession().getAttribute("ADMIN")!=null && request.getSession().getAttribute("USER")!=null){
+		%>
 	<jsp:include page="menu-account.jsp">
 		<jsp:param name="curr" value="PEGI" />
 	</jsp:include>
+
 
 	<main class="col-sm-9 offset-sm-3 col-md-8 offset-md-2 pt-3">
 	<h1>Mon compte</h1>
@@ -52,6 +57,8 @@
 		</div>
 		<div class="col-md">
 			<h2>Création</h2>
+			<div id="create-success"></div>
+			<div style="color:red" id="create-error"></div>
 			<form id="create" action="" method="post" onsubmit="return submitCreatePegi();">
 				<div style="width: 19%; display: inline-block;">Label :</div>
 				<input style="width: 80%" id="name" name="name" type="text">
@@ -63,6 +70,8 @@
 			</form>
 			<hr>
 			<h2>Modification</h2>
+			<div id="update-success"></div>
+			<div style="color:red" id="update-error"></div>
 			<form id="update" action="" method="post" onsubmit="return submitUpdatePegi();">
 			<div style="width: 19%; display: inline-block;">Label :</div>
 				<input style="width: 80%" id="name" name="name" type="text">
@@ -88,7 +97,9 @@
 	</div>
 	</div>
 
-
+	<%
+			}
+	%>
 
 	<!-- Bootstrap core JavaScript
     ================================================== --> <!-- Placed at the end of the document so the pages load faster -->

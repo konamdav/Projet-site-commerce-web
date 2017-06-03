@@ -25,15 +25,16 @@
 		<jsp:param name="curr" value="COMPTE" />
 	</jsp:include>
 
+	<%
+			if(request.getSession().getAttribute("USER")!=null){
+		%>
 	<jsp:include page="menu-account.jsp">
 		<jsp:param name="curr" value="ACCOUNT" />
 	</jsp:include>
 
 	<main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
 	<h1>Mon compte</h1>
-	<%
-			if(request.getSession().getAttribute("USER")!=null){
-		%>
+
 	<section class="row text-center placeholders">
 		<div class="col-md-3">
 			<img src="user.png" width="200" height="200" class="img-fluid "
@@ -59,7 +60,7 @@
 						</tr>
 
 						<tr>
-							<th >Mail</th>
+							<th>Mail</th>
 							<td id="mail"></td>
 						</tr>
 

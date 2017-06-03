@@ -7,16 +7,18 @@ function disconnect()
 
 function successDisconnectAPI(response)
 {
-	callWebServiceByAjax("GET", "session.jsp?DISCONNECT", successDisconnectFront, failureDisconnect);
+	//alert("disconnect ok (1/2) ");
+	callWebServiceByAjax("GET", "session.jsp?DISCONNECT=true", successDisconnectFront, failureDisconnect);
 }
 
 function successDisconnectFront(response)
 {
+	//alert("disconnect ok (2/2) ");
 	window.location='index.jsp';
 }
 
 
 function failureDisconnect(response)
 {
-	
+	alert("failure disconnection -> try again");
 }

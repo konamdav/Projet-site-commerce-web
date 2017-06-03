@@ -33,36 +33,36 @@
 			<div class="col-lg-6">
 				<h2>Inscription</h2>
 				<div id="signin-success"></div>
-				<div id="signin-error"></div>
+				<div style="color:red" id="signin-error"></div>
 				<hr>
 				<form action="" name="formSignin" method="get"
 					onsubmit="return submitSignin();">
 					<div class="form-group">
-						<label for="id_user">Identifiant</label> <input type="text"
+						<label for="id_user">Identifiant</label> <input required type="text"
 							class="form-control" id="username" name="username"
 							placeholder="Username">
 					</div>
 					<div class="form-group">
-						<label for="">Firstname</label> <input type="text"
+						<label for="">Firstname</label> <input required type="text"
 							class="form-control" id="firstname" name="firstname"
 							placeholder="Firstname">
 					</div>
 					<div class="form-group">
-						<label for="">Surname</label> <input type="text"
+						<label for="">Surname</label> <input required type="text"
 							class="form-control" id="surname" name="surname"
 							placeholder="Surname">
 					</div>
 
 					<div class="form-group">
-						<label for="email_user">Mail</label> <input type="email"
+						<label for="email_user">Mail</label> <input required type="email"
 							class="form-control" id="mail" name="mail"
 							aria-describedby="emailHelp" placeholder="Mail"> <small
-							id="emailHelp" class="form-text text-muted">Votre adresse
-							ne sera jamais partagÃ©.</small>
+							id="emailHelp" class="form-text text-muted">Votre mail
+							ne sera jamais partagée.</small>
 					</div>
 
 					<div class="form-group">
-						<label for="mdp_user">Mot de passe</label> <input type="password"
+						<label for="mdp_user">Mot de passe</label> <input required type="password"
 							class="form-control" id="password" name="password"
 							placeholder="Mot de passe">
 					</div>
@@ -83,17 +83,17 @@
 				<h2>Connexion</h2>
 				<hr>
 				<div id="login-success"></div>
-				<div id="login-error"></div>
+				<div style="color:red" id="login-error"></div>
 				<form action="" name="formLogin" method="get"
 					onsubmit="return submitLogin();">
 					<div class="form-group">
-						<label for="id_user">Username</label> <input type="text"
+						<label for="id_user">Username</label> <input required type="text"
 							class="form-control" id="id_user" name="username"
 							placeholder="Username">
 					</div>
 
 					<div class="form-group">
-						<label for="mdp_user">Mot de passe</label> <input type="password"
+						<label for="mdp_user">Mot de passe</label> <input required type="password"
 							class="form-control" id="mdp_user" name="password"
 							placeholder="Mot de passe">
 					</div>
@@ -106,7 +106,7 @@
 
 
 		<footer>
-			<p>&copy; Company 2017</p>
+			<p>&copy; David KONAM & Clément PASSOT | SR03 | 2017</p>
 		</footer>
 	</div>
 	<!-- /container -->

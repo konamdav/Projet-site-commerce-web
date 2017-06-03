@@ -1,13 +1,16 @@
 
 <%
-	if (request.getSession().getAttribute("USER")==null && request.getParameter("CONNECT") != null) {
+	if (request.getParameter("CONNECT") != null &&request.getSession().getAttribute("USER")==null ) {
 
 		request.getSession().setAttribute("USER", true);
-		request.getSession().setAttribute("USERNAME", request.getParameter("USERNAME"));
-		request.getSession().setAttribute("PASSWORD", request.getParameter("PASSWORD"));
 		
-		
-	} else if (request.getParameter("DISCONNECT") != null) {
+		if(request.getParameter("ROLE").equals("ADMIN"))
+		{
+			request.getSession().setAttribute("ADMIN", true);
+		}
+	} 
+
+	if (request.getParameter("DISCONNECT") != null) {
 		request.getSession().invalidate();
 	}
 %>

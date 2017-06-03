@@ -686,10 +686,11 @@ public class ProductService
 	{
 		Session session = Database.init();
 		VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame, session);
+		VideoGame videogame2 = ProductDatabase.findVideoGameByName(name, session);
 		Publisher publisher = ProductDatabase.findPublisherByID(id_publisher, session);
 		Response response;
 
-		if(videogame != null && publisher !=null)
+		if(videogame != null && publisher !=null && (videogame2==null || videogame2.getName().equals(videogame.getName())))
 		{
 			videogame.setName(name);
 			videogame.setPublisher(publisher);
@@ -738,7 +739,10 @@ public class ProductService
 		{
 			Console console = ProductDatabase.findConsoleByID(id_console, session);
 			VideoGame videogame = ProductDatabase.findVideoGameByID(id_videogame, session);
-			if(console != null && videogame != null)
+			
+			Product product2 = ProductDatabase.findProductByKey(videogame, console, session);
+			
+			if(console != null && videogame != null && (product2 == null || product2.getId()== product.getId()))
 			{
 				product.setConsole(console);
 				product.setDate_release(date);
@@ -853,8 +857,8 @@ public class ProductService
 		System.err.println(" post publisher ");
 		Session session = Database.init();
 		Publisher publisher = ProductDatabase.findPublisherByID(id_publisher, session);
-
-		if(publisher != null){
+		Publisher publisher2 = ProductDatabase.findPublisherByName(name, session);
+		if(publisher != null && (publisher2==null || publisher2.getId()== publisher.getId())){
 
 			publisher.setName(name);
 			ProductDatabase.insertPublisher(publisher, session);
@@ -917,7 +921,8 @@ public class ProductService
 	{
 		Session session = Database.init();
 		Genre genre = ProductDatabase.findGenreByID(id_genre, session);
-		if(genre != null){
+		Genre genre2 = ProductDatabase.findGenreByName(name, session);
+		if(genre != null && (genre2 == null || genre2.getId() == genre.getId())){
 
 			genre.setName(name);
 			ProductDatabase.insertGenre(genre, session);
@@ -982,7 +987,8 @@ public class ProductService
 	{
 		Session session = Database.init();
 		Console console = 	ProductDatabase.findConsoleByID(id_console, session);
-		if(console != null){
+		Console console2 = ProductDatabase.findConsoleByName(name, session);
+		if(console != null && (console2 == null || console2.getId() == console.getId())){
 
 			console.setName(name);
 			ProductDatabase.insertConsole(console, session);
@@ -1294,7 +1300,9 @@ public class ProductService
 	{
 		Session session = Database.init();
 		PegiClassification pegi = ProductDatabase.findPegiByID(id, session);
-		if(pegi != null){
+		PegiClassification pegi2 = ProductDatabase.findPegiByName(name, session);
+		
+		if(pegi != null && (pegi2 == null || pegi2.getId() == pegi.getId())){
 			pegi.setName(name);
 			pegi.setImg(img);
 
